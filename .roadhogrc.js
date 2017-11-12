@@ -15,7 +15,7 @@ export default {
   // 接口代理示例
     proxy: {
       "/api": {
-      "target": "http://172.16.12.152:8013/",
+      "target" : "http://61.50.135.114:8013/",
       "changeOrigin": true,
       "pathRewrite": { "^/api" : "" }
     },

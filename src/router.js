@@ -17,10 +17,18 @@ const Routers = function ({ history, app }) {
       models: () => [import('./models/dashboard')],
       component: () => import('./routes/dashboard/'),
     }, {
+      path: '/monitoroverview',
+      models: () => [import('./models/monitoroverview')],
+      component: () => import('./routes/monitoroverview/'),
+    }, {
+      path: '/monitormapview',
+      models: () => [import('./models/monitorpoint')],
+      component: () => import('./routes/monitormapview/'),
+    }, {
       path: '/login',
       models: () => [import('./models/login')],
       component: () => import('./routes/login/'),
-    }
+    },
   ]
 
   return (

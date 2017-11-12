@@ -1,9 +1,13 @@
 const APIV1 = '/api'
-const APIMOCK='/mock'
+const APIMOCK = '/mock'
 module.exports = {
   name: '环境监控平台',
   prefix: 'monitorOnline',
   footerText: '环境监控平台  © 2017 lee',
+  amapKey: 'c5cb4ec7ca3ba4618348693dd449002d',
+  centerlongitude: '116.418067',
+  centerlatitude: '39.930871',
+  zoom: 12,
   logo: '/logo.png',
   iconFontCSS: '/iconfont.css',
   iconFontJS: '/iconfont.js',
@@ -14,6 +18,13 @@ module.exports = {
   APIMOCK,
   api: {
     userLogin: `${APIV1}/rest/Author/IsLogins/`,
-    menus: `${APIMOCK}/menus`
+    menus: `${APIMOCK}/menus`,
+    pollutant: `${APIV1}/rest/OutputAsPointApi/GetPollutantCodes/`,
+    pollutanttype: `${APIV1}/rest/MenuInfo/GetPolluntType/`,
+    realtimeOverView: `${APIV1}/rest/OutputAsPointApi/GetPointNewRealTimeDataByPollutantType/`,
+    minuteOverView: `${APIV1}/rest/OutputAsPointApi/GetPointNewMinuteDataByPollutantType/`,
+    hourOverView: `${APIV1}/rest/OutputAsPointApi/GetPointNewHourDataByPollutantType/`,
+    dayOverView: `${APIV1}/rest/OutputAsPointApi/GetPointNewDayDataByPollutantType/`,
+    monitorpoint: `${APIV1}/rest/OutputAsPointApi/GetPointsByPollutantType/`,
   },
 }

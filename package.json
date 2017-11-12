@@ -11,7 +11,7 @@
     "install-node": "6.11.1"
   },
   "dependencies": {
-    "antd": "^2.13.0",
+    "antd": "^2.13.1",
     "axios": "^0.16.2",
     "babel-polyfill": "^6.26.0",
     "classnames": "^2.2.5",
@@ -26,6 +26,7 @@
     "less-vars-to-js": "^1.2.0",
     "lodash": "^4.17.4",
     "mockjs": "^1.0.1-beta3",
+    "moment": "^2.19.1",
     "nprogress": "^0.2.0",
     "path-to-regexp": "^2.0.0",
     "prop-types": "^15.5.10",
@@ -33,6 +34,7 @@
     "query-string": "^5.0.0",
     "rc-tween-one": "^1.4.5",
     "react": "^15.4.0",
+    "react-amap": "^1.1.0",
     "react-dom": "^15.6.1",
     "react-draft-wysiwyg": "^1.10.9",
     "react-helmet": "^5.2.0",

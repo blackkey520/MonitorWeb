@@ -13,14 +13,14 @@ let database = [
     bpid: '1',
     name: '数据一览',
     icon: 'layout',
-    route: '/generalview',
+    route: '/monitoroverview',
   },
   {
     id: '7',
     bpid: '1',
     name: '监控地图',
     icon: 'environment',
-    route: '/map',
+    route: '/monitormapview',
   },
   {
     id: '4',
@@ -81,7 +81,7 @@ let database = [
     name: '预警统计',
     icon: 'area-chart',
     route: '/Analytics/alarmstatic',
-  }
+  },
 ]
 
 module.exports = {

@@ -5,13 +5,7 @@ import { Row, Col, Card } from 'antd'
 import { color } from 'utils'
 import { Page } from 'components'
 import styles from './index.less'
-
-const bodyStyle = {
-  bodyStyle: {
-    height: 432,
-    background: '#fff',
-  },
-}
+ 
 
 function Dashboard ({ dashboard, loading }) {
 

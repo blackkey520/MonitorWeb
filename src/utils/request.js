@@ -84,7 +84,7 @@ export default function request (options) {
         options.fetchType = 'JSONP'
       }
     }
-  }
+  } 
   return fetch(options).then((response) => {
     const { statusText, status } = response
     let data = options.fetchType === 'YQL' ? response.data.query.results.json : response.data

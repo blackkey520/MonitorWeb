@@ -6,8 +6,10 @@ import { parse } from 'qs'
 import config from 'config'
 import { EnumRoleType } from 'enums'
 import * as menusService from 'services/menus'
+import * as appService from 'services/app'
 import queryString from 'query-string'
 import Cookie from 'js-cookie'
+
 const { prefix } = config
 
 export default {
@@ -29,6 +31,7 @@ export default {
     navOpenKeys: JSON.parse(window.localStorage.getItem(`${prefix}navOpenKeys`)) || [],
     locationPathname: '',
     locationQuery: {},
+    pollutanttype: [],
   },
   subscriptions: {
 
@@ -62,9 +65,11 @@ export default {
       payload,
     }, { call, put, select }) {
       const { locationPathname } = yield select(_ => _.app)
-      const usr=Cookie.get('token');
-      if (usr!='null'&&usr) {
-        const user=JSON.parse(usr);
+      const usr = Cookie.get('token')
+      if (usr != 'null' && usr) {
+        const user = JSON.parse(usr)
+        const pollutanttyperesult = yield call(appService.loadpollutanttype)
+        const pollutanttype = pollutanttyperesult.data
         const { list } = yield call(menusService.query)
         let menu = list
         yield put({
@@ -72,6 +77,7 @@ export default {
           payload: {
             user,
             menu,
+            pollutanttype,
           },
         })
         if (location.pathname === '/login') {
@@ -92,7 +98,7 @@ export default {
     * logout ({
       payload,
     }, { call, put }) {
-      Cookie.remove('token');
+      Cookie.remove('token')
       yield put({ type: 'query' })
     },
 
@@ -122,6 +128,7 @@ export default {
     },
 
     switchTheme (state) {
+      debugger
       window.localStorage.setItem(`${prefix}darkTheme`, !state.darkTheme)
       return {
         ...state,

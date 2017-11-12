@@ -9,13 +9,11 @@ export default {
   effects: {
     * login ({
       payload,
-    }, { put, call, select }) {
-
-      const data = yield call(login, payload)
-
+    }, { put, call, select }) { 
+      const data = yield call(login, payload) 
       const { locationQuery } = yield select(_ => _.app)
       if (data.success) {
-        Cookie.set('token', data.data);
+        Cookie.set('token', data.data)
         const { from } = locationQuery
         yield put({ type: 'app/query' })
         if (from && from !== '/login') {

@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Menu, Icon, Popover } from 'antd'
+import {Menu, Icon, Popover, Alert} from 'antd'
 import classnames from 'classnames'
 import styles from './Header.less'
 import Menus from './Menu'
@@ -33,6 +33,10 @@ const Header = ({ user, logout, switchSider, siderFold, isNavbar, menuPopoverVis
         >
           <Icon type={classnames({ 'menu-unfold': siderFold, 'menu-fold': !siderFold })} />
         </div>}
+        {/* <div>
+< Alert message = "Warning text" banner />
+          </div>
+         */}
       <div className={styles.rightWarpper}>
         <div className={styles.button}>
           <Icon type="mail" />
