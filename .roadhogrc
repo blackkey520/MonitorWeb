@@ -1,0 +1,31 @@
+{
+  "entry": "src/index.js",
+  "extraBabelPlugins": [
+    "transform-runtime",
+    "transform-decorators-legacy",
+    "transform-class-properties",
+    ["import", { "libraryName": "antd", "libraryDirectory": "es", "style": true }]
+  ],
+  proxy: {
+      "/api": {
+      "target" : "http://172.16.12.152:8013/",
+      "changeOrigin": true,
+      "pathRewrite": { "^/api" : "" }
+    },
+  },
+  "env": {
+    "development": {
+      "extraBabelPlugins": [
+        "dva-hmr"
+      ]
+    }
+  },
+  "externals": {
+    "g2": "G2",
+    "g-cloud": "Cloud",
+    "g2-plugin-slider": "G2.Plugin.slider"
+  },
+  "ignoreMomentLocale": true,
+  "theme": "./src/theme.js",
+  "hash": true
+}

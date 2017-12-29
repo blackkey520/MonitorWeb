@@ -1,63 +1,65 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import { Switch, Route, Redirect, routerRedux } from 'dva/router'
-import dynamic from 'dva/dynamic'
-import App from 'routes/app'
+import React from 'react';
+import { Router, Route, Switch } from 'dva/router';
+import { LocaleProvider, Spin } from 'antd';
+import zhCN from 'antd/lib/locale-provider/zh_CN';
+import dynamic from 'dva/dynamic';
+import cloneDeep from 'lodash/cloneDeep';
+import { getNavData } from './common/nav';
+import { getPlainNode } from './utils/utils';
 
-const { ConnectedRouter } = routerRedux
+import styles from './index.less';
 
-const Routers = function ({ history, app }) {
-  const error = dynamic({
+dynamic.setDefaultLoadingComponent(() => {
+  return <Spin size="large" className={styles.globalSpin} />;
+});
+
+function getRouteData(navData, path) {
+  if (!navData.some(item => item.layout === path) ||
+    !(navData.filter(item => item.layout === path)[0].children)) {
+    return null;
+  }
+  const route = cloneDeep(navData.filter(item => item.layout === path)[0]);
+  const nodeList = getPlainNode(route.children);
+  return nodeList;
+}
+
+function getLayout(navData, path) {
+  if (!navData.some(item => item.layout === path) ||
+    !(navData.filter(item => item.layout === path)[0].children)) {
+    return null;
+  }
+  const route = navData.filter(item => item.layout === path)[0];
+  return {
+    component: route.component,
+    layout: route.layout,
+    name: route.name,
+    path: route.path,
+  };
+}
+
+function RouterConfig({ history, app }) {
+  const navData = getNavData(app);
+  const UserLayout = getLayout(navData, 'UserLayout').component; 
+  const MonitorLayout = getLayout(navData, 'MonitorLayout').component; 
+  
+  const passProps = {
     app,
-    component: () => import('./routes/error'),
-  })
-  const routes = [
-    {
-      path: '/dashboard',
-      models: () => [import('./models/dashboard')],
-      component: () => import('./routes/dashboard/'),
-    }, {
-      path: '/monitoroverview',
-      models: () => [import('./models/monitoroverview')],
-      component: () => import('./routes/monitoroverview/'),
-    }, {
-      path: '/monitormapview',
-      models: () => [import('./models/monitorpoint')],
-      component: () => import('./routes/monitormapview/'),
-    }, {
-      path: '/login',
-      models: () => [import('./models/login')],
-      component: () => import('./routes/login/'),
+    navData,
+    getRouteData: (path) => {
+      return getRouteData(navData, path);
     },
-  ]
+  };
 
   return (
-    <ConnectedRouter history={history}>
-      <App>
+    <LocaleProvider locale={zhCN}>
+      <Router history={history}>
         <Switch>
-          <Route exact path="/" render={() => (<Redirect to="/dashboard" />)} />
-          {
-            routes.map(({ path, ...dynamics }, key) => (
-              <Route key={key}
-                exact
-                path={path}
-                component={dynamic({
-                  app,
-                  ...dynamics,
-                })}
-              />
-            ))
-          }
-          <Route component={error} />
+          <Route path="/user" render={props => <UserLayout {...props} {...passProps} />} /> 
+          <Route path="/" render={props=><MonitorLayout {...props} {...passProps}/>}/> 
         </Switch>
-      </App>
-    </ConnectedRouter>
-  )
+      </Router>
+    </LocaleProvider>
+  );
 }
 
-Routers.propTypes = {
-  history: PropTypes.object,
-  app: PropTypes.object,
-}
-
-export default Routers
+export default RouterConfig;

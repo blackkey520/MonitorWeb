@@ -1,30 +1,59 @@
-import { routerRedux } from 'dva/router'
-import { login } from 'services/login'
+import { routerRedux } from 'dva/router';
+import { fakeAccountLogin } from '../services/api';
+import {Model} from '../dvapack'
 import Cookie from 'js-cookie'
-export default {
+import {message} from 'antd'
+export default Model.extend({
   namespace: 'login',
 
-  state: {},
+  state: {
+    status: undefined,
+  },
 
   effects: {
-    * login ({
-      payload,
-    }, { put, call, select }) { 
-      const data = yield call(login, payload) 
-      const { locationQuery } = yield select(_ => _.app)
-      if (data.success) {
-        Cookie.set('token', data.data)
-        const { from } = locationQuery
-        yield put({ type: 'app/query' })
-        if (from && from !== '/login') {
-          yield put(routerRedux.push(from))
-        } else {
-          yield put(routerRedux.push('/dashboard'))
-        }
-      } else {
-        throw data
+    *login({ payload }, { call, put }) {
+      yield put({
+        type: 'changeSubmitting',
+        payload: true,
+      });
+      const response = yield call(fakeAccountLogin, payload);
+      
+      yield put({
+        type: 'changeLoginStatus',
+        payload: response,
+      });
+      // Login successfully
+      if (response.success) {
+        Cookie.set('token',response.data)
+        yield put(routerRedux.push('/'));
       }
+    },
+    *logout(_, { put }) {
+      yield put({
+        type: 'changeLoginStatus',
+        payload: {
+          status: false,
+        },
+      });
+      Cookie.remove('token')
+      yield put(routerRedux.push('/user/login'));
     },
   },
 
-}
+  reducers: {
+    changeLoginStatus(state, { payload }) {
+      return {
+        ...state,
+        status: payload.status,
+        type: payload.type,
+        submitting: false,
+      };
+    },
+    changeSubmitting(state, { payload }) {
+      return {
+        ...state,
+        submitting: payload,
+      };
+    },
+  },
+});
