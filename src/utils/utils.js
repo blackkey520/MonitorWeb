@@ -127,7 +127,7 @@ export function getRoutes(path, routerData) {
       key: `${path}${item}`,
       path: `${path}${item}`,
       component: routerData[`${path}${item}`].component,
-      exact
+      exact,
     };
   });
   return renderRoutes;
