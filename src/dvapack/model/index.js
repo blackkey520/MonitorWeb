@@ -3,26 +3,34 @@ import { message as Message, Modal } from 'antd';
 
 const PATH_SUBSCRIBER_KEY = '_pathSubscriberKey';
 
-const createNestedValueRecuder = (parentKey, value) => (state, { payload: { key } }) => {
-  let parentState = state[parentKey];
 
+const createNestedValueRecuder = (parentKey, value) => (state, {payload}) => {
+  let parentState = state[parentKey];
+  const {key} = payload;
   if (key) {
-    parentState = typeof parentState == 'boolean' ? {} : parentState;
-    parentState = { ...parentState, [key]: value };
+    parentState = typeof parentState === 'boolean'
+      ? {}
+      : parentState;
+    parentState = {
+      ...parentState,
+      [key]: value
+    };
   } else {
     // 兼容旧版本，如果type不存在，则直接对parent赋值
     parentState = value;
   }
-
   return {
     ...state,
+    ...payload,
     [parentKey]: parentState
   };
 };
 
-const createNestedRecuder = (parentKey) => (state, { payload }) => {
+const createNestedRecuder = parentKey => (state, {payload}) => {
   let parentState = state[parentKey];
-  parentState = typeof parentState == 'boolean' ? {} : parentState;
+  parentState = typeof parentState === 'boolean'
+    ? {}
+    : parentState;
 
   return {
     ...state,
@@ -30,39 +38,37 @@ const createNestedRecuder = (parentKey) => (state, { payload }) => {
       ...parentState,
       payload
     }
-  }
-}
-
-const getDefaultModel = () => {
-  return {
-    // 为了兼容旧版本，初始值依旧为false.如果应用中需要多个控制状态，则在model中覆盖初始属性
-    state: {
-      visible: false,
-      spinning: false,
-      loading: false,
-      confirmLoading: false
-    },
-    subscriptions: {},
-    effects: {},
-    reducers: {
-      showLoading: createNestedValueRecuder('loading', true),
-      hideLoading: createNestedValueRecuder('loading', false),
-      showConfirmLoading: createNestedValueRecuder('confirmLoading', true),
-      hideConfirmLoading: createNestedValueRecuder('confirmLoading', false),
-      showSpinning: createNestedValueRecuder('spinning', true),
-      hideSpinning: createNestedValueRecuder('spinning', false),
-      updateLoading: createNestedRecuder('loading'),
-      updateSpinner: createNestedRecuder('spinning'),
-      updateConfirmLoading: createNestedRecuder('confirmLoading'),
-      updateState(state, { payload }) {
-        return {
-          ...state,
-          ...payload
-        };
-      }
-    }
   };
 };
+const getDefaultModel = () => ({
+  // 为了兼容旧版本，初始值依旧为false.如果应用中需要多个控制状态，则在model中覆盖初始属性
+  state: {
+    visible: false,
+    spinning: false,
+    loading: false,
+    confirmLoading: false
+  },
+  subscriptions: {},
+  effects: {},
+  reducers: {
+    showLoading: createNestedValueRecuder('loading', true),
+    hideLoading: createNestedValueRecuder('loading', false),
+    showConfirmLoading: createNestedValueRecuder('confirmLoading', true),
+    hideConfirmLoading: createNestedValueRecuder('confirmLoading', false),
+    showSpinning: createNestedValueRecuder('spinning', true),
+    hideSpinning: createNestedValueRecuder('spinning', false),
+    updateLoading: createNestedRecuder('loading'),
+    updateSpinner: createNestedRecuder('spinning'),
+    updateConfirmLoading: createNestedRecuder('confirmLoading'),
+    updateState(state, {payload}) {
+      return {
+        ...state,
+        ...payload
+      };
+    }
+  }
+});
+
 
 /**
  * 扩展subscription函数的参数,支持listen方法，方便监听path改变
@@ -101,7 +107,7 @@ const enhanceSubscriptions = (subscriptions = {}) => {
 
       const listen = (pathReg, action) => {
         let listeners = {};
-        if (typeof pathReg == 'object') {
+        if (typeof pathReg === 'object') {
           listeners = pathReg;
         } else {
           listeners[pathReg] = action;
@@ -109,15 +115,15 @@ const enhanceSubscriptions = (subscriptions = {}) => {
 
         history.listen((location) => {
           const { pathname } = location;
-          Object.keys(listeners).forEach(key => {
+          Object.keys(listeners).forEach((key) => {
             const _pathReg = key;
             const _action = listeners[key];
             const match = pathToRegexp(_pathReg).exec(pathname);
 
             if (match) {
-              if (typeof _action == 'object') {
+              if (typeof _action === 'object') {
                 dispatch(_action);
-              } else if (typeof _action == 'function') {
+              } else if (typeof _action === 'function') {
                 _action({ ...location, params: match.slice(1) });
               }
             }
@@ -146,17 +152,19 @@ const enhanceEffects = (effects = {}) => {
   const wrappedEffects = {};
   Object
     .keys(effects)
-    .forEach(key => {
-      wrappedEffects[key] = function* (action, sagaEffects) {
+    .forEach((key) => {
+      wrappedEffects[key] = function * (action, sagaEffects) {
         const extraSagaEffects = {
           ...sagaEffects,
           put: createPutEffect(sagaEffects),
           update: createUpdateEffect(sagaEffects),
-          callWithLoading: createExtraCall(sagaEffects, { loading: true }),
-          callWithConfirmLoading: createExtraCall(sagaEffects, { confirmLoading: true }),
-          callWithSpinning: createExtraCall(sagaEffects, { spinning: true }),
+          callWithLoading: createExtraCall(sagaEffects, {loading: true}),
+          callWithConfirmLoading: createExtraCall(sagaEffects, {confirmLoading: true}),
+          callWithSpinning: createExtraCall(sagaEffects, {spinning: true}),
           callWithMessage: createExtraCall(sagaEffects),
-          callWithExtra: (serviceFn, args, config) => { createExtraCall(sagaEffects, config)(serviceFn, args, config); }
+          callWithExtra: (serviceFn, args, config) => {
+            createExtraCall(sagaEffects, config)(serviceFn, args, config);
+          }
         };
 
         yield effects[key](action, extraSagaEffects);
@@ -166,10 +174,13 @@ const enhanceEffects = (effects = {}) => {
   return wrappedEffects;
 
   function createPutEffect(sagaEffects) {
-    const { put } = sagaEffects;
-    return function* putEffect(type, payload) {
-      let action = { type, payload };
-      if (arguments.length == 1 && typeof type == 'object') {
+    const {put} = sagaEffects;
+    return function * putEffect(type, payload) {
+      let action = {
+        type,
+        payload
+      };
+      if (arguments.length === 1 && typeof type === 'object') {
         action = arguments[0];
       }
       yield put(action);
@@ -177,27 +188,45 @@ const enhanceEffects = (effects = {}) => {
   }
 
   function createUpdateEffect(sagaEffects) {
-    const { put } = sagaEffects;
-    return function* updateEffect(payload) {
-      yield put({ type: 'updateState', payload });
+    const {put} = sagaEffects;
+    return function * updateEffect(payload) {
+      yield put({type: 'updateState', payload});
     };
   }
 
+
   function createExtraCall(sagaEffects, config = {}) {
     const { put, call } = sagaEffects;
-    return function* extraCallEffect(serviceFn, args, message = {}) {
+    return function * extraCallEffect(serviceFn, args, payloadupdate, message = {}) {
       let result;
       const { loading, confirmLoading, spinning } = config;
       const { successMsg, errorMsg, key } = message;
-
       if (loading) {
-        yield put({ type: 'showLoading', payload: { key } });
+        yield put({
+          type: 'showLoading',
+          payload: {
+            ...payloadupdate,
+            key,
+          },
+        });
       }
       if (confirmLoading) {
-        yield put({ type: 'showConfirmLoading', payload: { key } });
+        yield put({
+          type: 'showConfirmLoading',
+          payload: {
+            ...payloadupdate,
+            key,
+          },
+        });
       }
       if (spinning) {
-        yield put({ type: 'showSpinning', payload: { key } });
+        yield put({
+          type: 'showSpinning',
+          payload: {
+            ...payloadupdate,
+            key,
+          },
+        });
       }
 
       try {
@@ -208,13 +237,31 @@ const enhanceEffects = (effects = {}) => {
         throw e;
       } finally {
         if (loading) {
-          yield put({ type: 'hideLoading', payload: { key } });
+          yield put({
+            type: 'hideLoading',
+            payload: {
+              ...payloadupdate,
+              key,
+            },
+          });
         }
         if (confirmLoading) {
-          yield put({ type: 'hideConfirmLoading', payload: { key } });
+          yield put({
+            type: 'hideConfirmLoading',
+            payload: {
+              ...payloadupdate,
+              key,
+            },
+          });
         }
         if (spinning) {
-          yield put({ type: 'hideSpinning', payload: { key } });
+          yield put({
+            type: 'hideSpinning',
+            payload: {
+              ...payloadupdate,
+              key,
+            },
+          });
         }
       }
 
@@ -222,7 +269,6 @@ const enhanceEffects = (effects = {}) => {
     };
   }
 };
-
 /**
  * 模型继承方法
  *
@@ -241,30 +287,30 @@ function extend(defaults, properties) {
   const { namespace } = properties;
 
   modelAssignKeys.forEach((key) => {
-    if (key == 'subscriptions') {
+    if (key === 'subscriptions') {
       properties[key] = enhanceSubscriptions(properties[key]);
     }
-    if (key == 'effects') {
+    if (key === 'effects') {
       properties[key] = enhanceEffects(properties[key]);
     }
     Object.assign(model[key], properties[key]);
   });
 
   const initialState = {
-    ...model.state
+    ...model.state,
   };
 
   Object.assign(model.reducers, {
     resetState() {
       return {
-        ...initialState
+        ...initialState,
       };
-    }
+    },
   });
 
   return Object.assign(model, { namespace });
 }
 
 export default {
-  extend
+  extend,
 };

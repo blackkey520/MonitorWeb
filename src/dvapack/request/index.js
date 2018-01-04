@@ -20,8 +20,10 @@ const codeMessage = {
 };
 
 async function geturl(url, tooken) {
-  const user = Cookie.get('token');
+  const usertoken = Cookie.get('token');
+
   if (!tooken) {
+    const user = JSON.parse(usertoken);
     if (user != null) {
       url += `?authorCode=${user.User_ID}`;
     }
@@ -55,7 +57,6 @@ async function request(url, _options) {
   console.log('RESP:', text);
   try {
     const json = await JSON.parse(text);
-
     // 如果请求失败
     if (resp.status !== 200) {
       const errortext = codeMessage[resp.status] || resp.statusText;

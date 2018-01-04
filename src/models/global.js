@@ -1,15 +1,22 @@
-import { queryNotices } from '../services/api';
+import { queryNotices } from '../services/mockservice';
+import { Model } from '../dvapack';
+import { loadPollutantType } from '../services/api';
 
-export default {
+
+export default Model.extend({
   namespace: 'global',
-
   state: {
     collapsed: false,
     notices: [],
     fetchingNotices: false,
+    pollutanttype: [],
   },
-
   effects: {
+    *fetchPolluantType(_, { call, put, update }) {
+      const pollutanttyperesult = yield call(loadPollutantType);
+      const pollutanttype = pollutanttyperesult.data;
+      yield update({ pollutanttype });
+    },
     *fetchNotices(_, { call, put }) {
       yield put({
         type: 'changeNoticeLoading',
@@ -67,13 +74,18 @@ export default {
   },
 
   subscriptions: {
-    setup({ history }) {
+    setup({ dispatch, history }) {
       // Subscribe history(url) change, trigger `load` action if pathname is `/`
       return history.listen(({ pathname, search }) => {
         if (typeof window.ga !== 'undefined') {
           window.ga('send', 'pageview', pathname + search);
         }
+        // if (pathname === '/list') {
+        //   dispatch({ type: 'fetchPollutantType',
+        //     payload: {},
+        //   });
+        // }
       });
     },
   },
-};
+});

@@ -1,3 +1,4 @@
+import Cookie from 'js-cookie';
 import { query as queryUsers, queryCurrent } from '../services/user';
 
 export default {
@@ -26,10 +27,12 @@ export default {
       });
     },
     *fetchCurrent(_, { call, put }) {
-      const response = yield call(queryCurrent);
+      const response = Cookie.get('token');
+      const user = JSON.parse(response);
+
       yield put({
         type: 'saveCurrentUser',
-        payload: response,
+        payload: user,
       });
     },
   },

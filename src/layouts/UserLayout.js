@@ -7,7 +7,7 @@ import GlobalFooter from '../components/GlobalFooter';
 import styles from './UserLayout.less';
 import logo from '../assets/logo.svg';
 import config from '../config';
- 
+import { getRoutes } from '../utils/utils';
 
 const copyright = <div>Copyright <Icon type="copyright" /> 2017 蚂蚁金服体验技术部出品</div>;
 
@@ -20,18 +20,17 @@ class UserLayout extends React.PureComponent {
     return { location };
   }
   getPageTitle() {
-    const { getRouteData, location } = this.props;
+    const { routerData, location } = this.props;
     const { pathname } = location;
     let title = config.name;
-    getRouteData('UserLayout').forEach((item) => {
-      if (item.path === pathname) {
-        title = `${item.name} -${config.name}`;
-      }
-    });
+    if (routerData[pathname] && routerData[pathname].name) {
+      title = `${routerData[pathname].name} - ${config.name}`;
+    }
     return title;
   }
+
   render() {
-    const { getRouteData } = this.props;
+    const { routerData, match } = this.props;
 
     return (
       <DocumentTitle title={this.getPageTitle()}>
@@ -46,25 +45,25 @@ class UserLayout extends React.PureComponent {
             <div className={styles.desc}>{config.logindesc}</div>
           </div>
           {
-            getRouteData('UserLayout').map(item =>
+            getRoutes(match.path, routerData).map(item =>
               (
                 <Route
-                  exact={item.exact}
-                  key={item.path}
+                  key={item.key}
                   path={item.path}
                   component={item.component}
+                  exact={item.exact}
                 />
               )
             )
           }
           <GlobalFooter
-          links={[]}
-          copyright={
-            <div>
+            links={[]}
+            copyright={
+              <div>
               Copyright <Icon type="copyright" />{config.footerText}
-            </div>
+              </div>
           }
-        />
+          />
         </div>
       </DocumentTitle>
     );

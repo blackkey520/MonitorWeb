@@ -1,30 +1,31 @@
 import { routerRedux } from 'dva/router';
+import Cookie from 'js-cookie';
+
 import { fakeAccountLogin } from '../services/api';
-import {Model} from '../dvapack'
-import Cookie from 'js-cookie'
-import {message} from 'antd'
+import { Model } from '../dvapack';
+
+
 export default Model.extend({
   namespace: 'login',
-
   state: {
     status: undefined,
   },
-
   effects: {
-    *login({ payload }, { call, put }) {
+    *login({ payload }, { call, put, take }) {
       yield put({
         type: 'changeSubmitting',
         payload: true,
       });
       const response = yield call(fakeAccountLogin, payload);
-      
       yield put({
         type: 'changeLoginStatus',
-        payload: response,
+        payload: { status: response.requstresult === '1' ? 'ok' : 'faild' },
       });
       // Login successfully
-      if (response.success) {
-        Cookie.set('token',response.data)
+      if (response.requstresult === '1') {
+        Cookie.set('token', response.data);
+        yield put({ type: 'global/fetchPolluantType', payload: { } });
+        yield take('global/fetchPolluantType/@@end');
         yield put(routerRedux.push('/'));
       }
     },
@@ -35,7 +36,7 @@ export default Model.extend({
           status: false,
         },
       });
-      Cookie.remove('token')
+      Cookie.remove('token');
       yield put(routerRedux.push('/user/login'));
     },
   },
@@ -45,7 +46,6 @@ export default Model.extend({
       return {
         ...state,
         status: payload.status,
-        type: payload.type,
         submitting: false,
       };
     },

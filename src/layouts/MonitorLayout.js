@@ -1,41 +1,58 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Layout, Menu, Breadcrumb,Icon } from 'antd'; 
+import { Layout, Icon } from 'antd';
 import DocumentTitle from 'react-document-title';
 import { connect } from 'dva';
-import { Route, Redirect, Switch,Link } from 'dva/router';
+import { Route, Redirect, Switch } from 'dva/router';
 import { ContainerQuery } from 'react-container-query';
 import classNames from 'classnames';
 import MonitorHeader from '../components/MonitorHeader';
 import GlobalFooter from '../components/GlobalFooter';
-import SiderMenu from '../components/SiderMenu';
-import NotFound from '../routes/Exception/404'; 
+import NotFound from '../routes/Exception/404';
 import config from '../config';
+import { getRoutes } from '../utils/utils';
+import { getMenuData } from '../common/menu';
 
-const { Header, Content, Footer } = Layout; 
+/**
+ * 根据菜单取得重定向地址.
+ */
+const redirectData = [];
+const getRedirect = (item) => {
+  if (item && item.children) {
+    if (item.children[0] && item.children[0].path) {
+      redirectData.push({ from: `/${item.path}`, to: `/${item.children[0].path}` });
+      item
+        .children
+        .forEach((children) => {
+          getRedirect(children);
+        });
+    }
+  }
+};
+getMenuData().forEach(getRedirect);
+const { Content } = Layout;
 
 const query = {
-    'screen-xs': {
-      maxWidth: 575,
-    },
-    'screen-sm': {
-      minWidth: 576,
-      maxWidth: 767,
-    },
-    'screen-md': {
-      minWidth: 768,
-      maxWidth: 991,
-    },
-    'screen-lg': {
-      minWidth: 992,
-      maxWidth: 1199,
-    },
-    'screen-xl': {
-      minWidth: 1200,
-    },
-  };
-
+  'screen-xs': {
+    maxWidth: 575,
+  },
+  'screen-sm': {
+    minWidth: 576,
+    maxWidth: 767,
+  },
+  'screen-md': {
+    minWidth: 768,
+    maxWidth: 991,
+  },
+  'screen-lg': {
+    minWidth: 992,
+    maxWidth: 1199,
+  },
+  'screen-xl': {
+    minWidth: 1200,
+  },
+};
 
 class MonitorLayout extends React.PureComponent {
     static childContextTypes = {
@@ -43,26 +60,33 @@ class MonitorLayout extends React.PureComponent {
       breadcrumbNameMap: PropTypes.object,
       routeData: PropTypes.array,
     }
-    
-     
+
+    getChildContext() {
+      const { location } = this.props;
+      return { location };
+    }
+    // componentDidMount() {
+    //   this.props.dispatch({
+    //     type: 'global/fetchPollutantType',
+    //   });
+    // }
+
     getPageTitle() {
-      const { location, getRouteData } = this.props;
+      const { routerData, location } = this.props;
       const { pathname } = location;
       let title = config.name;
-      getRouteData('MonitorLayout').forEach((item) => {
-        if (item.path === pathname) {
-          title = `${item.name} - ${config.name}`;
-        }
-      });
+      if (routerData[pathname] && routerData[pathname].name) {
+        title = `${routerData[pathname].name} - ${config.name}`;
+      }
       return title;
-    } 
+    }
     render() {
       const {
-        currentUser, collapsed, fetchingNotices, notices, getRouteData, navData, location, dispatch,
-      } = this.props; 
+        currentUser, collapsed, fetchingNotices, notices, match, navData, location, dispatch, routerData,
+      } = this.props;
       const layout = (
         <Layout className="layout">
-        <MonitorHeader
+          <MonitorHeader
             location={location}
             navData={navData}
             currentUser={currentUser}
@@ -71,51 +95,42 @@ class MonitorLayout extends React.PureComponent {
             collapsed={collapsed}
             dispatch={dispatch}
           />
-   
-         <Content style={{ margin: ' 24px 24px 0 24px ',  height: '100%' }}>
+
+          <Content style={{ margin: ' 10px 10px 0 10px ', height: '100%' }}>
             <div style={{ minHeight: 'calc(100vh - 260px)' }}>
               <Switch>
                 {
-                  getRouteData('MonitorLayout').map(item =>
-                    (
-                      <Route
-                        exact={item.exact}
-                        key={item.path}
-                        path={item.path}
-                        component={item.component}
-                      />
-                    )
+                  redirectData.map(item =>
+                    <Redirect key={item.from} exact from={item.from} to={item.to} />
                   )
                 }
-                <Redirect exact from="/" to="/user/login" />
-                <Route component={NotFound} />
+                {
+                  getRoutes(match.path, routerData).map(item => (
+                    <Route
+                      key={item.key}
+                      path={item.path}
+                      component={item.component}
+                      exact={item.exact}
+                    />
+                  ))
+                }
+                <Redirect exact from="/" to={getMenuData()[0].path} />
+                <Route render={NotFound} />
               </Switch>
             </div>
-           
+
           </Content>
           <GlobalFooter
-          links={[{
-            title: 'Pro 首页',
-            href: 'http://pro.ant.design',
-            blankTarget: true,
-          }, {
-            title: 'GitHub',
-            href: 'https://github.com/ant-design/ant-design-pro',
-            blankTarget: true,
-          }, {
-            title: 'Ant Design',
-            href: 'http://ant.design',
-            blankTarget: true,
-          }]}
-          copyright={
-            <div>
+            links={[]}
+            copyright={
+              <div>
               Copyright <Icon type="copyright" />{config.footerText}
-            </div>
+              </div>
           }
-        />
-  </Layout>
+          />
+        </Layout>
       );
-  
+
       return (
         <DocumentTitle title={this.getPageTitle()}>
           <ContainerQuery query={query}>
@@ -124,14 +139,12 @@ class MonitorLayout extends React.PureComponent {
         </DocumentTitle>
       );
     }
-  }
-  
-  export default connect(state => ({
-    currentUser: state.user.currentUser,
-    collapsed: state.global.collapsed,
-    fetchingNotices: state.global.fetchingNotices,
-    notices: state.global.notices,
-  }))(MonitorLayout);
-  
+}
 
- 
+export default connect(state => ({
+  currentUser: state.user.currentUser,
+  collapsed: state.global.collapsed,
+  fetchingNotices: state.global.fetchingNotices,
+  notices: state.global.notices,
+}))(MonitorLayout);
+

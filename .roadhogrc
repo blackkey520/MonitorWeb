@@ -6,12 +6,12 @@
     "transform-class-properties",
     ["import", { "libraryName": "antd", "libraryDirectory": "es", "style": true }]
   ],
-  proxy: {
+  "proxy": {
       "/api": {
       "target" : "http://172.16.12.152:8013/",
       "changeOrigin": true,
       "pathRewrite": { "^/api" : "" }
-    },
+    }
   },
   "env": {
     "development": {
