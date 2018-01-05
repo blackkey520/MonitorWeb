@@ -1,10 +1,10 @@
 // import liraries
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import { Table, Radio, Select, Cascader, Input } from 'antd';
+import { Table, Radio, Select, Cascader, Input, Card } from 'antd';
 import moment from 'moment';
 import city from '../../utils/city';
-
+import styles from './index.less';
 
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
@@ -16,7 +16,7 @@ const Search = Input.Search;
 @connect(({ loading, monitor, global }) => ({
   ...loading,
   columns: monitor.columns,
-  data: monitor.columns,
+  data: monitor.data,
   pollutanttype: global.pollutanttype,
 }))
 class MonitorDataList extends Component {
@@ -30,67 +30,77 @@ class MonitorDataList extends Component {
       loading: effects['monitor/querydata'],
       pagination: false,
       scroll: {
-        y: data.length * 45,
+        y: true,
         x: columns.length * 100,
       },
       bordered: true,
     };
     return (
-      <div>
-        <InputGroup compact >
-          <RadioGroup
-            onChange={({ target }) => {
-          let time = moment().format('YYYY-MM-DD HH:mm:ss');
-          if (moment().minute() < 10) {
-            time = moment().add(-1, 'hours').format('YYYY-MM-DD HH:mm:ss');
-          }
-          this.props.dispatch({
-            type: 'monitor/querydata',
-            payload: {
-              ...query,
-              searchTime: time,
-              monitortype: target.value,
-            },
-          });
-        }}
-            defaultValue="realtime"
-            size="default"
-            style={{ marginLeft: 10 }}
-          >
-            <RadioButton value="realtime"> 实时 </RadioButton>
-            <RadioButton value="minute"> 分钟 </RadioButton>
-            <RadioButton value="hour"> 小时 </RadioButton>
-            <RadioButton value="day"> 日均 </RadioButton>
-          </RadioGroup>
-          <Cascader options={city}placeholder="请选择行政区" style={{ width: 250, marginLeft: 10 }} />
-          <Select
-            onChange={(value) => {
-                this.props.dispatch({
-            type: 'monitor/querydata',
-            payload: {
-              ...query,
-              pollutantType: value,
-            },
-          });
-        }}
-            defaultValue={pollutanttype[0].Name}
-            size="default"
-            style={{ width: 70, marginLeft: 10 }}
-          >
-            {
-              pollutanttype.map((item, key) => {
-                return <Option key={key} value={item.ID}>{item.Name}</Option>;
-              })
-          }
-          </Select>
+      <div
+        style={{ width: '100%',
+      height: 'calc(100vh - 120px)' }}
+        className={styles.standardList}
+      >
+        <Card
+          bordered={false}
+          title="监控列表"
+          extra={<div >
+            <RadioGroup
+              onChange={({ target }) => {
+        let time = moment().format('YYYY-MM-DD HH:mm:ss');
+        if (moment().minute() < 10) {
+          time = moment().add(-1, 'hours').format('YYYY-MM-DD HH:mm:ss');
+        }
+        this.props.dispatch({
+          type: 'monitor/querydata',
+          payload: {
+            ...query,
+            searchTime: time,
+            monitortype: target.value,
+          },
+        });
+      }}
+              defaultValue="realtime"
+              size="default"
+              style={{ marginLeft: 10 }}
+            >
+              <RadioButton value="realtime"> 实时 </RadioButton>
+              <RadioButton value="minute"> 分钟 </RadioButton>
+              <RadioButton value="hour"> 小时 </RadioButton>
+              <RadioButton value="day"> 日均 </RadioButton>
+            </RadioGroup>
+            <Cascader options={city}placeholder="请选择行政区" style={{ width: 250, marginLeft: 10 }} />
+            <Select
+              onChange={(value) => {
+              this.props.dispatch({
+          type: 'monitor/querydata',
+          payload: {
+            ...query,
+            pollutantType: value,
+          },
+        });
+      }}
+              defaultValue={pollutanttype[0].Name}
+              size="default"
+              style={{ width: 100, marginLeft: 10 }}
+            >
+              {
+            pollutanttype.map((item, key) => {
+              return <Option key={key} value={item.ID}>{item.Name}</Option>;
+            })
+        }
+            </Select>
 
-          <Search
-            placeholder="输入条件模糊搜索"
-            style={{ width: 270 }}
-            onSearch={value => console.log(value)}
-          />
-        </InputGroup>
-        <Table {...listProps} />
+            <Search
+              placeholder="输入条件模糊搜索"
+              style={{ width: 270, marginLeft: 10 }}
+              onSearch={value => console.log(value)}
+            />
+          </div>}
+
+        >
+          <Table {...listProps} />
+        </Card >
       </div>
     );
   }

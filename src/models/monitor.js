@@ -1,7 +1,7 @@
 import { loadPollutantType, loadPollutant, loadMonitoroverView } from '../services/api';
 import { Model } from '../dvapack';
 import moment from 'moment';
-import {Icon} from 'antd'
+import { Icon } from 'antd';
 
 export default Model.extend({
   namespace: 'monitor',
@@ -22,7 +22,7 @@ export default Model.extend({
       const columns = [
         {
           title: '状态',
-          width: 50,
+          width: 70,
           dataIndex: 'status',
           key: 'status',
           fixed: 'left',
@@ -30,49 +30,87 @@ export default Model.extend({
         },
         {
           title: '监测点',
-          width: 200,
+          width: 300,
           dataIndex: 'point',
           key: 'point',
           fixed: 'left',
         },
         {
           title: '监测时间',
-          width: 180,
+          width: 200,
           dataIndex: 'datetime',
           key: 'datetime',
           fixed: 'left',
         },
       ];
       columnpollutant.data.map((item, key) => {
-        columns.push({
-          title: `${item.PollutantName}[${item.Unit}]`,
-          width: 100,
-          dataIndex: item.PollutantCode,
-          key: item.PollutantCode,
-          render: text => <span style={{ color: text ? text.split('|')[1] : '#666666' }}>{text ? text.split('|')[0] : '-'}</span >,
-        });
+        if (key === columnpollutant.data.length - 1) {
+          columns.push({
+            title: `${item.PollutantName}[${item.Unit}]`,
+            dataIndex: item.PollutantCode,
+            sorter: (a, b) => {
+              if (a[item.PollutantCode] === '-') {
+                return -1;
+              }
+              if (b[item.PollutantCode] === '-') {
+                return 1;
+              }
+              if (a[item.PollutantCode] > b[item.PollutantCode]) {
+                return 1;
+              }
+              if (a[item.PollutantCode] < b[item.PollutantCode]) {
+                return -1;
+              }
+              return 0;
+            },
+            key: item.PollutantCode,
+            render: text => <span style={{ color: text ? text.split('|')[1] : '#666666' }}>{text ? text.split('|')[0] : '-'}</span >,
+          });
+        } else {
+          columns.push({
+            title: `${item.PollutantName}[${item.Unit}]`,
+            width: 180,
+            dataIndex: item.PollutantCode,
+            sorter: (a, b) => {
+              if (a[item.PollutantCode] === '-') {
+                return -1;
+              }
+              if (b[item.PollutantCode] === '-') {
+                return 1;
+              }
+              if (a[item.PollutantCode] > b[item.PollutantCode]) {
+                return 1;
+              }
+              if (a[item.PollutantCode] < b[item.PollutantCode]) {
+                return -1;
+              }
+              return 0;
+            },
+            key: item.PollutantCode,
+            render: text => <span style={{ color: text ? text.split('|')[1] : '#666666' }}>{text ? text.split('|')[0] : '-'}</span >,
+          });
+        }
       });
       const result = yield call(loadMonitoroverView, payload);
       const data = [];
+
       result.data.map((item, key) => {
-        const dataitem = {};
-        
+        const dataitem = {
+          status: item.status,
+          point: `${item.pname}-${item.text}`,
+          datetime: item.Times,
+        };
         columns.map((columnsitem, columnskey) => {
-          if (columnskey === 0) {
-            dataitem[columnsitem.key] = item.status;
-          } else if (columnskey === 1) {
-            dataitem[columnsitem.key] = `${item.pname}-${item.text}`;
-          } else if (columnskey === 2) {
-            dataitem[columnsitem.key] = item.Times;
-          } else {
-            dataitem[columnsitem.key] = item.Values[columnskey - 3]
-              ? `${item.Values[columnskey - 3]}|${item.Colors[columnskey - 3]}`
+          if (columnskey > 2) {
+            dataitem[columnsitem.key] = item[columnsitem.key]
+              ? `${item[columnsitem.key]}|${item[`${columnsitem.key}_color`]}`
               : '-';
           }
         });
-        dataitem.key = key;
+        dataitem.key = key + 1;
         data.push(dataitem);
       });
+
       if (result) {
         yield update({ data, columns });
       }

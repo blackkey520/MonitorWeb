@@ -8,7 +8,7 @@
   ],
   "proxy": {
       "/api": {
-      "target" : "http://172.16.12.152:8013/",
+      "target" : "http://172.16.4.137:37879/",
       "changeOrigin": true,
       "pathRewrite": { "^/api" : "" }
     }

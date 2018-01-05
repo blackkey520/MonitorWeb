@@ -18,7 +18,8 @@ export async function loadPollutantType(params) {
 export async function loadMonitoroverView(params) {
   const body = {
     pollutantType: params.pollutantType,
-    searchTime: params.searchTime,
+    searchTime: '2018-01-04 10:00:00',
+    GroupId: '',
   };
   let url;
   if (params.monitortype === 'realtime') {

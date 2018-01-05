@@ -21,16 +21,16 @@ const codeMessage = {
 
 async function geturl(url, tooken) {
   const usertoken = Cookie.get('token');
-
+  let newurl = url;
   if (!tooken) {
     const user = JSON.parse(usertoken);
     if (user != null) {
-      url += `?authorCode=${user.User_ID}`;
+      newurl += `?authorCode=${user.User_ID}`;
     }
   } else if (tooken !== 'notooken') {
-    url += `?authorCode=${tooken}`;
+    newurl += `?authorCode=${tooken}`;
   }
-  return url;
+  return newurl;
 }
 
 const fetchtimeout = (requestPromise, timeout = 30000) => {
@@ -56,7 +56,7 @@ async function request(url, _options) {
   const text = await resp.text();
   console.log('RESP:', text);
   try {
-    const json = await JSON.parse(text);
+    const json = await JSON.parse(text); 
     // 如果请求失败
     if (resp.status !== 200) {
       const errortext = codeMessage[resp.status] || resp.statusText;

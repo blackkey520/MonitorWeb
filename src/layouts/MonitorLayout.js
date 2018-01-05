@@ -13,6 +13,7 @@ import NotFound from '../routes/Exception/404';
 import config from '../config';
 import { getRoutes } from '../utils/utils';
 import { getMenuData } from '../common/menu';
+import AuthorizedRoute from '../components/AuthorizedRoute';
 
 /**
  * 根据菜单取得重定向地址.
@@ -106,7 +107,7 @@ class MonitorLayout extends React.PureComponent {
                 }
                 {
                   getRoutes(match.path, routerData).map(item => (
-                    <Route
+                    <AuthorizedRoute
                       key={item.key}
                       path={item.path}
                       component={item.component}

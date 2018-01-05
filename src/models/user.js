@@ -26,14 +26,16 @@ export default {
         payload: false,
       });
     },
-    *fetchCurrent(_, { call, put }) {
+    *fetchCurrent(_, { put }) {
       const response = Cookie.get('token');
-      const user = JSON.parse(response);
+      if (response) {
+        const user = JSON.parse(response);
 
-      yield put({
-        type: 'saveCurrentUser',
-        payload: user,
-      });
+        yield put({
+          type: 'saveCurrentUser',
+          payload: user,
+        });
+      }
     },
   },
 

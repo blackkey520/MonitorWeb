@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
+import Cookie from 'js-cookie';
 import { Route, Redirect } from 'dva/router';
 import { connect } from 'dva';
 
@@ -6,23 +7,23 @@ import { connect } from 'dva';
   pollutanttype: global.pollutanttype,
 }))
 
-export default class extends Component {
+export default class extends PureComponent {
   render() {
     const { component: Component, pollutanttype, ...rest } = this.props;
+    const usertoken = Cookie.get('token');
     return (
       <Route
         {...rest}
         render={
                 (props) => {
-                    if (true)
-                    {
+                    if (usertoken && usertoken != null && usertoken !== '' && pollutanttype.length !== 0) {
                         return <Component {...props} />;
                     } else {
                         return <Redirect to="/user/login" />;
                     }
                 }
             }
-            />
+      />
     );
   }
 }
