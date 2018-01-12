@@ -15,6 +15,11 @@ const menuData = [
         path: 'map',
         icon: 'environment-o',
       },
+      {
+        name: '地图测试',
+        path: 'maptest',
+        icon: 'environment-o',
+      },
     ],
   },
   {

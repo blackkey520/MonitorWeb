@@ -1,10 +1,18 @@
 // import liraries
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import { Map, Markers, InfoWindow } from 'react-amap';
+import { Select, Cascader, Input, Card, Spin } from 'antd';
+import { routerRedux } from 'dva/router';
 import config from '../../config';
+import MarkerDetail from '../../components/MarkerDetail';
+import styles from './index.less';
+import city from '../../utils/city';
 
-const { amapKey, centerlongitude, centerlatitude, zoom } = config;
+const Option = Select.Option;
+const Search = Input.Search;
+
+const { amapKey, zoom } = config;
 const plugins = [
   'MapType',
   'Scale', {
@@ -18,54 +26,79 @@ const plugins = [
   },
 ];
 
-@connect(({ loading, points }) => ({
+@connect(({ loading, points, global }) => ({
   ...loading,
   pointlist: points.pointlist,
+  pollutanttype: global.pollutanttype,
+  lastdata: points.lastdata,
+  hourtendency: points.hourtendency,
+  selectpoint: points.selectpoint,
 }))
-class MonitorDataMap extends Component {
+class MonitorDataMap extends PureComponent {
   constructor() {
     super();
+    const _this = this;
+    this.map = null;
     this.state = {
-      position: { longitude: centerlongitude,
-        latitude: centerlatitude },
-      offset: [10, -20],
-      size: { width: 270, height: 330 },
-      showwindow: false,
-      Content: null,
+      position: [0, 0],
+      visible: false,
     };
-    this.markersEvents = {
-      click(e, marker) {
-        // 通过高德原生提供的 getExtData 方法获取原始数据
-        const extData = marker.getExtData();
-        this.setState({
-          position: {
-            longitude: extData.longitude,
-            latitude: extData.latitude,
-          },
-          offset: [10, -20],
-          showwindow: true,
-          size: { width: 270, height: 330 },
-          Content: null,
+    // this.amapEvents = {
+    //   created: (mapInstance) => {
+    //     let addInfoWin;
+    //     AMap.plugin('AMap.InfoWindow', () => {
+    //       addInfoWin = new AMap.InfoWindow({
+    //         isCustom: false,
+    //       });
+    //       // infowindow.open(mapInstance, [116.481488, 39.990464]);
+    //       _this.infoWindow = addInfoWin;
+    //     });
+
+    //     _this.map = mapInstance;
+    //   },
+    // };
+    this.markerEvents = {
+      click: (MapsOption, marker) => {
+        const itemdata = marker.F.extData;
+        _this.props.dispatch(
+          {
+            type: 'points/querypointlastdata',
+            payload: {
+              itemdata,
+            },
+          }
+        );
+        _this.setState({
+          visible: false,
         });
-      },
-    };
-    this.windowEvents = {
-      // created: (iw) => { console.log(iw) },
-      // open: () => { console.log('InfoWindow opened') },
-      close: () => {
-        this.setState({
-          showwindow: false,
+        _this.setState({
+          position: { longitude: itemdata.longitude, latitude: itemdata.latitude },
+          visible: true,
         });
+        // _this.infoWindow.setContent(`<div class="infowindow-content"><div class="amap-info-header">${itemdata.targetName}-${itemdata.pointName}</div><div class="amap-info-body">test<TipContent/></div></div>`);
+        // _this.infoWindow.open(_this.map, [itemdata.longitude, itemdata.latitude]);
       },
-      // change: () => { console.log('InfoWindow prop changed') },
     };
   }
 
   render() {
     const markers = [];
+    const { location, pollutanttype, effects } = this.props;
+    const { payload = {} } = location;
+    // const singleStyle = {
+    //   url: 'https://avatars1.githubusercontent.com/u/17128499?s=88&v=4',
+    //   size: [50, 50],
+    // };
+
+    const clusterOptions = {
+      zoomOnClick: true,
+      gridSize: 30,
+      minClusterSize: 3,
+      // styles: [singleStyle, singleStyle, singleStyle],
+    };
     this.props.pointlist.map((item, key) => {
       markers.push({
-        key,
+        key: item.pointCode,
         position: {
           longitude: item.longitude,
           latitude: item.latitude,
@@ -75,25 +108,78 @@ class MonitorDataMap extends Component {
       });
     });
     return (
-      <div style={{
-          width: '100%',
-          height: 'calc(100vh - 120px)',
-        }}
+      <div
+        style={{ width: '100%',
+      height: 'calc(100vh - 120px)' }}
+        className={styles.standardList}
       >
-        <Map
-          viewMode="3D"
-          amapkey={amapKey}
-          plugins={plugins}
-          center={{
-              longitude: centerlongitude,
-              latitude: centerlatitude,
+        <Card
+          bordered={false}
+          bodyStyle={
+            {
+              height: 'calc(100vh - 200px)',
+              padding: '0px 20px',
+            }
+          }
+          title="监控地图"
+          extra={<div >
+            <Cascader options={city}placeholder="请选择行政区" style={{ width: 250, marginLeft: 10 }} />
+            <Select
+              onChange={(value) => {
+                this.props.dispatch(routerRedux.push(
+                  {
+                    type: 'points/querymonitorpoint',
+                    payload: {
+                      ...payload,
+                      pollutantType: value,
+                    },
+                  }
+                ));
             }}
-          zoom={zoom}
+              defaultValue={pollutanttype[0].Name}
+              size="default"
+              style={{ width: 100, marginLeft: 10 }}
+            >
+              {
+            pollutanttype.map((item, key) => {
+              return <Option key={key} value={item.ID}>{item.Name}</Option>;
+            })
+        }
+            </Select>
+
+            <Search
+              placeholder="输入条件模糊搜索"
+              style={{ width: 270, marginLeft: 10 }}
+              onSearch={value => console.log(value)}
+            />
+          </div>}
+
         >
-          <Markers
-            markers={markers}
-            events={this.markersEvents}
-            render={(extData) => {
+          <div
+            style={{ width: '100%',
+            height: 'calc(100vh - 220px)',
+            flex: 1,
+            textAlign: 'center',
+            justifyContent: 'center',
+            alignItems: 'center',
+           }}
+          >
+            <Map
+              loading={<Spin />}
+              amapkey={amapKey}
+              plugins={plugins}
+              // center={{
+              //   longitude: centerlongitude,
+              //   latitude: centerlatitude,
+              // }}
+              // // events={this.amapEvents}
+              // zoom={zoom}
+            >
+              <Markers
+                markers={markers}
+                events={this.markerEvents}
+                useCluster={clusterOptions}
+                render={(extData) => {
                 return (<div style={{ background: `url('${window.location.origin}/api/Themes/Gis/Icon/arcgisIcon/${extData.imgName}')`,
                   backgroundSize: 'contain',
                   backgroundRepeat: 'no-repeat',
@@ -105,20 +191,30 @@ class MonitorDataMap extends Component {
                   lineHeight: '40px' }}
                 />);
               }}
-            useCluster
-          />
-          <InfoWindow
-            position={this.state.position}
-            visible={this.state.visible}
-            isCustom={false}
-            content={this.state.Content}
-            size={this.state.size}
-            offset={this.state.offset}
-            events={this.windowEvents}
-          />
-        </Map>
+              />
+              <InfoWindow
+                autoMove
+                isCustom={false}
+                showShadow
+                visible={this.state.visible}
+                position={this.state.position}
+                ref={(ref) => { this.infoWindow = ref; }}
+              >
+                <MarkerDetail
+                  lastdata={this.props.lastdata}
+                  hourtendency={this.props.hourtendency}
+                  selectpoint={this.props.selectpoint}
+                  effects={this.props.effects}
+                />
+              </InfoWindow>
+            </Map>
+
+          </div>
+        </Card >
       </div>);
   }
 }
+
+
 // make this component available to the app
 export default MonitorDataMap;

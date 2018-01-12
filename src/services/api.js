@@ -1,4 +1,3 @@
-import { stringify } from 'qs';
 import { post, get } from '../dvapack/request';
 
 export async function fakeAccountLogin(params) {
@@ -10,15 +9,43 @@ export async function fakeAccountLogin(params) {
 
   return result === null ? { data: null } : result;
 }
-export async function loadPollutantType(params) {
+export async function loadPollutantType() {
   const result = await get('/api/rest/MenuInfo/GetPolluntType/', {}, null);
   return result === null ? { data: null } : result;
 }
-
+export async function loadLastdata(params) {
+  const body = {
+    dgimn: params.dgimn,
+  };
+  const result = await get('/api/rest/OutputAsPointApi/GetPointNewRealTimeData/', body, null);
+  return result === null ? { data: null } : result;
+}
+export async function loadMonitorDatalist(params) {
+  const body = {
+    PollutantCode: params.PollutantCode,
+    DGIMN: params.DGIMN,
+    BeginTime: params.BeginTime,
+    EndTime: params.EndTime,
+    pageIndex: params.pageIndex,
+    pageSize: params.pageSize,
+  };
+  let url = '';
+  if (params.dataType === 'realtime') {
+    url = '/api/rest/RealTime/GetRealTimeData/';
+  } else if (params.dataType === 'minute') {
+    url = '/api/rest/Minute/GetMinuteData/';
+  } else if (params.dataType === 'hour') {
+    url = '/api/rest/Hour/GetHourSinglePollutantData/';
+  } else if (params.dataType === 'day') {
+    url = '/api/rest/Day/GetDaySinglePollutantData/';
+  }
+  const result = await get(url, body, null);
+  return result;
+}
 export async function loadMonitoroverView(params) {
   const body = {
     pollutantType: params.pollutantType,
-    searchTime: '2018-01-04 10:00:00',
+    searchTime: '20                                                                                                                                                                                        18-01-04 10:00:00',
     GroupId: '',
   };
   let url;

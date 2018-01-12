@@ -27,6 +27,12 @@ export const getNavDataa = app => [
         icon: 'environment-o',
         component: dynamicWrapper(app, [], () => import('../routes/MonitorDataMap')),
       },
+      {
+        name: '地图测试',
+        path: 'maptest',
+        icon: 'environment-o',
+        component: dynamicWrapper(app, [], () => import('../routes/AMapTest')),
+      },
     ],
   },
   {
