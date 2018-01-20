@@ -9,16 +9,42 @@ const menuData = [
         name: '监测数据列表',
         path: 'list',
         icon: 'bars',
+        isshow: true,
+        children: [
+          {
+            name: '点位详情',
+            path: 'monitordetail',
+            isshow: false,
+            children: [
+              {
+                name: '实时数据',
+                path: 'realtimedata',
+                isshow: false,
+              },
+              {
+                name: '分钟数据',
+                path: 'minutdata',
+                isshow: false,
+              },
+              {
+                name: '小时数据',
+                path: 'hourdata',
+                isshow: false,
+              },
+              {
+                name: '日数据',
+                path: 'realtimedata',
+                isshow: false,
+              },
+            ],
+          },
+        ],
       },
       {
         name: '监测数据地图',
         path: 'map',
         icon: 'environment-o',
-      },
-      {
-        name: '地图测试',
-        path: 'maptest',
-        icon: 'environment-o',
+        isshow: true,
       },
     ],
   },

@@ -5,6 +5,7 @@ import { Layout, Icon } from 'antd';
 import DocumentTitle from 'react-document-title';
 import { connect } from 'dva';
 import { Route, Redirect, Switch } from 'dva/router';
+import dynamic from 'dva/dynamic';
 import { ContainerQuery } from 'react-container-query';
 import classNames from 'classnames';
 import MonitorHeader from '../components/MonitorHeader';
@@ -21,8 +22,9 @@ import AuthorizedRoute from '../components/AuthorizedRoute';
 const redirectData = [];
 const getRedirect = (item) => {
   if (item && item.children) {
-    if (item.children[0] && item.children[0].path) {
-      redirectData.push({ from: `/${item.path}`, to: `/${item.children[0].path}` });
+    const child = item.children.filter(route => route.isshow);
+    if (child[0] && child[0].path) {
+      redirectData.push({ from: `/${item.path}`, to: `/${child[0].path}` });
       item
         .children
         .forEach((children) => {
@@ -32,6 +34,7 @@ const getRedirect = (item) => {
   }
 };
 getMenuData().forEach(getRedirect);
+
 const { Content } = Layout;
 
 const query = {
@@ -61,10 +64,12 @@ class MonitorLayout extends React.PureComponent {
       breadcrumbNameMap: PropTypes.object,
       routeData: PropTypes.array,
     }
-
     getChildContext() {
-      const { location } = this.props;
-      return { location };
+      const { location, routerData } = this.props;
+      return {
+        location,
+        breadcrumbNameMap: routerData,
+      };
     }
     // componentDidMount() {
     //   this.props.dispatch({

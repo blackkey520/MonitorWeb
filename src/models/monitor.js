@@ -2,6 +2,7 @@ import moment from 'moment';
 import { Icon } from 'antd';
 import { loadPollutantType, loadPollutant, loadMonitoroverView } from '../services/api';
 import { Model } from '../dvapack';
+import { Link } from 'dva/router';
 
 export default Model.extend({
   namespace: 'monitor',
@@ -32,6 +33,7 @@ export default Model.extend({
           title: '监测点',
           width: 300,
           dataIndex: 'point',
+          render: (text, record) => <Link to={{ pathname: '/list/monitordetail', record }} >{text}</Link>,
           key: 'point',
           fixed: columnpollutant.data.length > 5 ? 'left' : false,
         },

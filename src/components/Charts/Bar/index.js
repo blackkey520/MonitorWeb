@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Chart, Axis, Tooltip, Geom } from 'bizcharts';
+import moment from 'moment';
 import Debounce from 'lodash-decorators/debounce';
 import Bind from 'lodash-decorators/bind';
 import autoHeight from '../autoHeight';
@@ -59,6 +60,7 @@ class Bar extends Component {
       height,
       title,
       forceFit = true,
+      pollutant,
       data,
       color = 'rgba(24, 144, 255, 0.85)',
       padding,
@@ -69,6 +71,9 @@ class Bar extends Component {
     const scale = {
       x: {
         type: 'cat',
+        formatter: (value) => {
+          return moment(value).format('HH');
+        },
       },
       y: {
         min: 0,
@@ -78,16 +83,15 @@ class Bar extends Component {
     const tooltip = ['x*y', (x, y) => {
       return {
         // 自定义 tooltip 上显示的 title 显示内容等。
-        name: '监测时间',
-        title: `时间${x} 数值${y}`,
-        value: `${x}时`,
+        time: `时间:${moment(x).format('DD 日 HH 时')}`,
+        value: `数值:${y}(${pollutant.Unit})`,
       };
     }];
 
     return (
       <div className={styles.chart} style={{ height }} ref={this.handleRoot}>
         <div ref={this.handleRef}>
-          {title && <h4>{title}</h4>}
+          {title && <h4>{pollutant.PollutantName + title}</h4>}
           <Chart
             scale={scale}
             height={title ? height - 41 : height}
@@ -95,11 +99,9 @@ class Bar extends Component {
             data={data}
             padding={{ top: 5, right: 5, bottom: 27, left: 25 }}
           >
-            <Axis
-              name="x"
-            />
+            <Axis name="x" />
             <Axis name="y" />
-            <Tooltip showTitle={false} crosshairs={false} />
+            <Tooltip itemTpl="<div>{time}<br/> {value}</div>" showTitle={false} crosshairs={false} />
             <Geom type="interval" position="x*y" color={color} tooltip={tooltip} />
           </Chart>
         </div>

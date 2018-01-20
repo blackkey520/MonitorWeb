@@ -38,6 +38,21 @@ export const getRouterData = (app) => {
     '/list': {
       component: dynamicWrapper(app, ['monitor', 'login'], () => import('../routes/MonitorDataList')),
     },
+    '/list/monitordetail': {
+      component: dynamicWrapper(app, [], () => import('../routes/MonitorDetail')),
+    },
+    '/list/monitordetail/realtimedata': {
+      component: dynamicWrapper(app, [], () => import('../routes/MonitorDetail/RealTimeData')),
+    },
+    '/list/monitordetail/minutedata': {
+      component: dynamicWrapper(app, [], () => import('../routes/MonitorDetail/MinuteData')),
+    },
+    '/list/monitordetail/hourdata': {
+      component: dynamicWrapper(app, [], () => import('../routes/MonitorDetail/HourData')),
+    },
+    '/list/monitordetail/daydata': {
+      component: dynamicWrapper(app, [], () => import('../routes/MonitorDetail/DayData')),
+    },
     '/map': {
       component: dynamicWrapper(app, ['points'], () => import('../routes/MonitorDataMap')),
     },

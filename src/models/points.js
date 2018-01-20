@@ -8,6 +8,7 @@ export default Model.extend({
   state: {
     pointlist: [],
     lastdata: [],
+    pollutant: {},
     hourtendency: [],
     selectpoint: [],
   },
@@ -21,16 +22,16 @@ export default Model.extend({
         selectpoint: payload.itemdata,
         lastdata,
       });
-      yield put({ type: 'queryhourtendency', payload: { pollutantcode: lastdata[0].PollutantCode } });
+      yield put({ type: 'queryhourtendency', payload: { pollutant: { PollutantCode: lastdata[0].PollutantCode, PollutantName: lastdata[0].PollutantName, Unit: lastdata[0].Unit } } });
     },
     * queryhourtendency({
       payload,
     }, { call, select, update }) {
       const { selectpoint } = yield select(_ => _.points);
-      const result = yield call(loadMonitorDatalist, { PollutantCode: payload.pollutantcode,
+      const result = yield call(loadMonitorDatalist, { PollutantCode: payload.pollutant.PollutantCode,
         DGIMN: selectpoint.dgimn,
-        BeginTime: moment().add(-13, 'hours').format('YYYY-MM-DD HH:00:00'),
-        EndTime: moment().add(-1, 'hours').format('YYYY-MM-DD HH:00:00'),
+        BeginTime: moment().add(-12, 'hours').format('YYYY-MM-DD HH:00:00'),
+        EndTime: moment().add(1, 'hours').format('YYYY-MM-DD HH:00:00'),
         pageIndex: 1,
         pageSize: 1000,
         dataType: 'hour',
@@ -38,12 +39,13 @@ export default Model.extend({
       const hourtendency = [];
       result.data.map((item, key) => {
         hourtendency.push({
-          x: moment(item.MonitorTime).format('HH'),
+          x: moment(item.MonitorTime).format('YYYY-MM-DD HH:00:00'),
           y: item.AvgValue,
         });
       });
       yield update({
         hourtendency,
+        pollutant: payload.pollutant,
       });
     },
     * querymonitorpoint({

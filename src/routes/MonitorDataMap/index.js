@@ -8,6 +8,7 @@ import config from '../../config';
 import MarkerDetail from '../../components/MarkerDetail';
 import styles from './index.less';
 import city from '../../utils/city';
+import BreadcrumbHeader from '../../components/BreadcrumbHeader';
 
 const Option = Select.Option;
 const Search = Input.Search;
@@ -33,6 +34,7 @@ const plugins = [
   lastdata: points.lastdata,
   hourtendency: points.hourtendency,
   selectpoint: points.selectpoint,
+  pollutant: points.pollutant,
 }))
 class MonitorDataMap extends PureComponent {
   constructor() {
@@ -80,7 +82,16 @@ class MonitorDataMap extends PureComponent {
       },
     };
   }
-
+  changePollutant=(pollutant) => {
+    this.props.dispatch(
+      {
+        type: 'points/queryhourtendency',
+        payload: {
+          pollutant,
+        },
+      }
+    );
+  }
   render() {
     const markers = [];
     const { location, pollutanttype, effects } = this.props;
@@ -89,7 +100,7 @@ class MonitorDataMap extends PureComponent {
     //   url: 'https://avatars1.githubusercontent.com/u/17128499?s=88&v=4',
     //   size: [50, 50],
     // };
-
+    const windowheight = 220 + (this.props.lastdata.length * 15);
     const clusterOptions = {
       zoomOnClick: true,
       gridSize: 30,
@@ -121,7 +132,7 @@ class MonitorDataMap extends PureComponent {
               padding: '0px 20px',
             }
           }
-          title="监控地图"
+          title={<BreadcrumbHeader />}
           extra={<div >
             <Cascader options={city}placeholder="请选择行政区" style={{ width: 250, marginLeft: 10 }} />
             <Select
@@ -152,7 +163,7 @@ class MonitorDataMap extends PureComponent {
               style={{ width: 270, marginLeft: 10 }}
               onSearch={value => console.log(value)}
             />
-          </div>}
+                 </div>}
 
         >
           <div
@@ -195,15 +206,21 @@ class MonitorDataMap extends PureComponent {
               <InfoWindow
                 autoMove
                 isCustom={false}
+                size={{
+                  width: 290,
+                  height: windowheight,
+                }}
                 showShadow
                 visible={this.state.visible}
                 position={this.state.position}
                 ref={(ref) => { this.infoWindow = ref; }}
               >
                 <MarkerDetail
+                  changePollutant={this.changePollutant}
                   lastdata={this.props.lastdata}
                   hourtendency={this.props.hourtendency}
                   selectpoint={this.props.selectpoint}
+                  pollutant={this.props.pollutant}
                   effects={this.props.effects}
                 />
               </InfoWindow>

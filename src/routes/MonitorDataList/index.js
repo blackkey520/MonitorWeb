@@ -6,6 +6,7 @@ import moment from 'moment';
 import { routerRedux } from 'dva/router';
 import city from '../../utils/city';
 import styles from './index.less';
+import BreadcrumbHeader from '../../components/BreadcrumbHeader';
 
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
@@ -50,7 +51,7 @@ class MonitorDataList extends Component {
               padding: '0px 20px',
             }
           }
-          title="监控列表"
+          title={<BreadcrumbHeader />}
           extra={<div >
             <RadioGroup
               onChange={({ target }) => {
@@ -107,7 +108,7 @@ class MonitorDataList extends Component {
               style={{ width: 270, marginLeft: 10 }}
               onSearch={value => console.log(value)}
             />
-                 </div>}
+          </div>}
 
         >
           <Table {...listProps} />

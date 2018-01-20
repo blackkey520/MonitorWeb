@@ -74,42 +74,47 @@ export default class MonitorHeader extends PureComponent {
           itemPath = `${parentPath}/${item.path || ''}`.replace(/\/+/g, '/');
         }
         if (item.children && item.children.some(child => child.name)) {
-          return (
-            <SubMenu
-              title={
-                    item.icon ? (
-                      <span>
-                        <Icon type={item.icon} />
-                        <span>{item.name}</span>
-                      </span>
-                    ) : item.name
-                  }
-              key={item.key || item.path}
-            >
-              {this.getNavMenuItems(item.children, itemPath)}
-            </SubMenu>
-          );
+          const child = item.children.filter(route => route.isshow);
+          if (child.length !== 0) {
+            return (
+              <SubMenu
+                title={
+                      item.icon ? (
+                        <span>
+                          <Icon type={item.icon} />
+                          <span>{item.name}</span>
+                        </span>
+                      ) : item.name
+                    }
+                key={item.key || item.path}
+              >
+                {this.getNavMenuItems(item.children, itemPath)}
+              </SubMenu>
+            );
+          }
         }
         const icon = item.icon && <Icon type={item.icon} />;
-        return (
-          <Menu.Item key={item.key || item.path}>
-            {
-                  /^https?:\/\//.test(itemPath) ? (
-                    <a href={itemPath} target={item.target}>
-                      {icon}<span>{item.name}</span>
-                    </a>
-                  ) : (
-                    <Link
-                      to={itemPath}
-                      target={item.target}
-                      replace={itemPath === this.props.location.pathname}
-                    >
-                      {icon}<span>{item.name}</span>
-                    </Link>
-                  )
-                }
-          </Menu.Item>
-        );
+        if (item.isshow) {
+          return (
+            <Menu.Item key={item.key || item.path}>
+              {
+                    /^https?:\/\//.test(itemPath) ? (
+                      <a href={itemPath} target={item.target}>
+                        {icon}<span>{item.name}</span>
+                      </a>
+                    ) : (
+                      <Link
+                        to={itemPath}
+                        target={item.target}
+                        replace={itemPath === this.props.location.pathname}
+                      >
+                        {icon}<span>{item.name}</span>
+                      </Link>
+                    )
+                  }
+            </Menu.Item>
+          );
+        }
       });
     }
 
