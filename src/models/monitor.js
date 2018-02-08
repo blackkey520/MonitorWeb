@@ -33,7 +33,7 @@ export default Model.extend({
           title: '监测点',
           width: 300,
           dataIndex: 'point',
-          render: (text, record) => <Link to={{ pathname: '/list/monitordetail', record }} >{text}</Link>,
+          render: (text, record) => <Link to={`/monitor/list/${record.DGIMN}`} >{text}</Link>,
           key: 'point',
           fixed: columnpollutant.data.length > 5 ? 'left' : false,
         },
@@ -74,6 +74,7 @@ export default Model.extend({
       const data = [];
       result.data.map((item, key) => {
         const dataitem = {
+          DGIMN: item.DGIMN,
           status: item.status,
           point: `${item.pname}-${item.text}`,
           datetime: item.Times,
@@ -97,7 +98,7 @@ export default Model.extend({
   subscriptions: {
     setup({ dispatch, history }) {
       return history.listen(({ pathname, payload }) => {
-        if (pathname === '/list') {
+        if (pathname === '/monitor/list') {
           const { pollutantType = null, searchTime = moment().format('YYYY-MM-DD'), monitortype = 'realtime' } = payload || {};
           dispatch({ type: 'querydata',
             payload: {

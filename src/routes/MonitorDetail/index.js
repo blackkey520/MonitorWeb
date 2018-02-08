@@ -8,11 +8,8 @@ import { getRoutes } from '../../utils/utils';
 
 const { TabPane } = Tabs;
 
-@connect(({ loading, monitor, global }) => ({
+@connect(({ loading }) => ({
   ...loading,
-  columns: monitor.columns,
-  data: monitor.data,
-  pollutanttype: global.pollutanttype,
 }))
 class MonitorDetail extends Component {
   onChange=(key) => {
@@ -21,7 +18,7 @@ class MonitorDetail extends Component {
   }
   render() {
     const { match, routerData } = this.props;
-    const tablist = [{ key: 'realtimedata', tab: '实时数据' }, { key: 'minutedata', tab: '分钟数据' }, { key: 'hourdata', tab: '小时数据' }, { key: 'daydata', tab: '日数据' }];
+    const tablist = [{ key: 'realtime', tab: '实时数据' }, { key: 'minute', tab: '分钟数据' }, { key: 'hour', tab: '小时数据' }, { key: 'day', tab: '日数据' }];
     const routes = getRoutes(match.path, routerData);
     return (
       <div
@@ -38,6 +35,7 @@ class MonitorDetail extends Component {
       }
           title={<BreadcrumbHeader />}
         >
+          
           <Tabs onChange={this.onChange}>
             {
                 tablist.map(item => <TabPane tab={item.tab} key={item.key} />)
@@ -46,9 +44,10 @@ class MonitorDetail extends Component {
           <Switch>
             {
                 routes.map(item => (<Route key={item.key} path={item.path} component={item.component} exact={item.exact} />))
-          }
+            }
           </Switch>
         </Card>
+        {this.props.match.params.pointid}
       </div>
     );
   }

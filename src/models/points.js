@@ -63,7 +63,7 @@ export default Model.extend({
   subscriptions: {
     setup({ dispatch, history }) {
       return history.listen(({ pathname, payload }) => {
-        if (pathname === '/map') {
+        if (pathname === '/monitor/map') {
           const {
             pollutantType = null,
             pageIndex = 1,

@@ -5,7 +5,6 @@ import { Layout, Icon } from 'antd';
 import DocumentTitle from 'react-document-title';
 import { connect } from 'dva';
 import { Route, Redirect, Switch } from 'dva/router';
-import dynamic from 'dva/dynamic';
 import { ContainerQuery } from 'react-container-query';
 import classNames from 'classnames';
 import MonitorHeader from '../components/MonitorHeader';
@@ -86,16 +85,56 @@ class MonitorLayout extends React.PureComponent {
       }
       return title;
     }
+
+    getBashRedirect = () => {
+      // According to the url parameter to redirect
+      // 这里是重定向的,重定向到 url 的 redirect 参数所示地址
+      const urlParams = new URL(window.location.href);
+
+      const redirect = urlParams.searchParams.get('redirect');
+      // Remove the parameters in the url
+      if (redirect) {
+        urlParams.searchParams.delete('redirect');
+        window.history.replaceState(null, 'redirect', urlParams.href);
+      } else {
+        const rtnpath = this.findFirstRedirectMenu(getMenuData());
+        if (rtnpath && rtnpath.indexOf('http') === 0) {
+          return rtnpath;
+        } else {
+          return `/${rtnpath || ''}`.replace(/\/+/g, '/');
+        }
+      }
+      return redirect;
+    }
+    findFirstRedirectMenu=(data) => {
+      const menus = data.filter(item => item.name && !item.hideInMenu);
+      if (menus.length !== 0) {
+        if (menus[0].children && menus[0].children.length !== 0) {
+          const childmenus = menus[0].children.filter(item => item.name && !item.hideInMenu);
+          if (childmenus.length !== 0) {
+            return this.findFirstRedirectMenu(menus[0].children);
+          } else {
+            return menus[0].path;
+          }
+        } else {
+          return menus[0].path;
+        }
+      } else {
+        return 'null';
+      }
+    }
     render() {
       const {
         currentUser, collapsed, fetchingNotices, notices, match, navData, location, dispatch, routerData,
       } = this.props;
+      const bashRedirect = this.getBashRedirect();
       const layout = (
         <Layout className="layout">
           <MonitorHeader
             location={location}
             navData={navData}
             currentUser={currentUser}
+            menuData={getMenuData()}
             fetchingNotices={fetchingNotices}
             notices={notices}
             collapsed={collapsed}
@@ -111,16 +150,19 @@ class MonitorLayout extends React.PureComponent {
                   )
                 }
                 {
-                  getRoutes(match.path, routerData).map(item => (
-                    <AuthorizedRoute
-                      key={item.key}
-                      path={item.path}
-                      component={item.component}
-                      exact={item.exact}
-                    />
-                  ))
+                  getRoutes(match.path, routerData).filter(item => item.path !== '/monitor/list/:pointid').map((item) => {
+                    return (
+                      <AuthorizedRoute
+                        key={item.key}
+                        path={item.path}
+                        component={item.component}
+                        exact={item.exact}
+                      />
+                    );
+                  })
                 }
-                <Redirect exact from="/" to={getMenuData()[0].path} />
+                <Route exact path="/monitor/list/:pointid" component={routerData['/monitor/list/:pointid'].component} />
+                <Redirect exact from="/" to={bashRedirect} />
                 <Route render={NotFound} />
               </Switch>
             </div>

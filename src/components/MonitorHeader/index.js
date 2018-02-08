@@ -1,190 +1,203 @@
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
-import { Layout, Menu, Icon, Spin, Tag, Dropdown, Avatar, message } from 'antd';
-import moment from 'moment';
 import groupBy from 'lodash/groupBy';
-import { Link } from 'dva/router';
+import moment from 'moment';
+import { Layout, Menu, Icon, Spin, Tag, Dropdown, Avatar } from 'antd';
+import pathToRegexp from 'path-to-regexp';
 import Debounce from 'lodash-decorators/debounce';
+import { Link } from 'dva/router';
 import NoticeIcon from '../../components/NoticeIcon';
 import HeaderSearch from '../../components/HeaderSearch';
 import styles from './index.less';
 import config from '../../config';
 import logo from '../../assets/logo.svg';
-import { getMenuData } from '../../common/menu';
 
 
 const { Header } = Layout;
 const { SubMenu } = Menu;
+
+const getIcon = (icon) => {
+  if (typeof icon === 'string' && icon.indexOf('http') === 0) {
+    return <img src={icon} alt="icon" className={styles.icon} />;
+  }
+  if (typeof icon === 'string') {
+    return <Icon type={icon} />;
+  }
+  return icon;
+};
 export default class MonitorHeader extends PureComponent {
-    static childContextTypes = {
-      location: PropTypes.object,
-      breadcrumbNameMap: PropTypes.object,
-      routeData: PropTypes.array,
-    }
-    constructor(props) {
-      super(props);
-      // 把一级 Layout 的 children 作为菜单项
-
-      // this.menus = props.navData.reduce((arr, current) => arr.concat(current.children), []);
-      this.menus = getMenuData();
-      this.state = {
-        openKeys: this.getDefaultCollapsedSubMenus(props),
-      };
-    }
-    getChildContext() {
-      const { location } = this.props;
-      return { location };
-    }
-    componentDidMount() {
-      this.props.dispatch({
-        type: 'user/fetchCurrent',
+  constructor(props) {
+    super(props);
+    this.menus = props.menuData;
+    this.state = {
+      openKeys: this.getDefaultCollapsedSubMenus(props),
+    };
+  }
+  componentDidMount() {
+    this.props.dispatch({
+      type: 'user/fetchCurrent',
+    });
+  }
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.location.pathname !== this.props.location.pathname) {
+      this.setState({
+        openKeys: this.getDefaultCollapsedSubMenus(nextProps),
       });
     }
-    componentWillUnmount() {
-      this.triggerResizeEvent.cancel();
+  }
+  componentWillUnmount() {
+    this.triggerResizeEvent.cancel();
+  }
+
+  getNoticeData() {
+    const { notices = [] } = this.props;
+    if (notices.length === 0) {
+      return {};
     }
-    getDefaultCollapsedSubMenus(props) {
-      const currentMenuSelectedKeys = [...this.getCurrentMenuSelectedKeys(props)];
-      currentMenuSelectedKeys.splice(-1, 1);
-      if (currentMenuSelectedKeys.length === 0) {
-        return ['dashboard'];
+    const newNotices = notices.map((notice) => {
+      const newNotice = { ...notice };
+      if (newNotice.datetime) {
+        newNotice.datetime = moment(notice.datetime).fromNow();
       }
-      return currentMenuSelectedKeys;
+      // transform id to item key
+      if (newNotice.id) {
+        newNotice.key = newNotice.id;
+      }
+      if (newNotice.extra && newNotice.status) {
+        const color = ({
+          todo: '',
+          processing: 'blue',
+          urgent: 'red',
+          doing: 'gold',
+        })[newNotice.status];
+        newNotice.extra = <Tag color={color} style={{ marginRight: 0 }}>{newNotice.extra}</Tag>;
+      }
+      return newNotice;
+    });
+    return groupBy(newNotices, 'type');
+  }
+
+
+  getDefaultCollapsedSubMenus(props) {
+    const { location: { pathname } } = props || this.props;
+    // eg. /list/search/articles = > ['','list','search','articles']
+    let snippets = pathname.split('/');
+    // Delete the end
+    // eg.  delete 'articles'
+    snippets.pop();
+    // Delete the head
+    // eg. delete ''
+    snippets.shift();
+    // eg. After the operation is completed, the array should be ['list','search']
+    // eg. Forward the array as ['list','list/search']
+    snippets = snippets.map((item, index) => {
+      // If the array length > 1
+      if (index > 0) {
+        // eg. search => ['list','search'].join('/')
+        return snippets.slice(0, index + 1).join('/');
+      }
+      // index 0 to not do anything
+      return item;
+    });
+    snippets = snippets.map((item) => {
+      return this.getSelectedMenuKeys(`/${item}`)[0];
+    });
+    // eg. ['list','list/search']
+    return snippets;
+  }
+  getFlatMenuKeys(menus) {
+    let keys = [];
+    menus.forEach((item) => {
+      if (item.children) {
+        keys.push(item.path);
+        keys = keys.concat(this.getFlatMenuKeys(item.children));
+      } else {
+        keys.push(item.path);
+      }
+    });
+    return keys;
+  }
+    getSelectedMenuKeys = (path) => {
+      const flatMenuKeys = this.getFlatMenuKeys(this.menus);
+      return flatMenuKeys.filter((item) => {
+        return pathToRegexp(`/${item}`).test(path);
+      });
     }
-    getCurrentMenuSelectedKeys(props) {
-      const { location: { pathname } } = props || this.props;
-      const keys = pathname.split('/').slice(1);
-      if (keys.length === 1 && keys[0] === '') {
-        return [this.menus[0].key];
+    /*
+    * 判断是否是http链接.返回 Link 或 a
+    * Judge whether it is http link.return a or Link
+    * @memberof SiderMenu
+    */
+    getMenuItemPath = (item) => {
+      const itemPath = this.conversionPath(item.path);
+      const icon = getIcon(item.icon);
+      const { target, name } = item;
+      // Is it a http link
+      if (/^https?:\/\//.test(itemPath)) {
+        return (
+          <a href={itemPath} target={target}>
+            {icon}<span>{name}</span>
+          </a>
+        );
       }
-      return keys;
+      return (
+        <Link
+          to={itemPath}
+          target={target}
+          replace={itemPath === this.props.location.pathname}
+          onClick={this.props.isMobile ? () => { this.props.onCollapse(true); } : undefined}
+        >
+          {icon}<span>{name}</span>
+        </Link>
+      );
     }
-    getNavMenuItems(menusData, parentPath = '') {
-      if (!menusData) {
-        return [];
-      }
-      return menusData.map((item) => {
-        if (!item.name) {
-          return null;
-        }
-        let itemPath;
-        if (item.path.indexOf('http') === 0) {
-          itemPath = item.path;
+  /**
+   * get SubMenu or Item
+   */
+  getSubMenuOrItem=(item) => {
+    if (item.children && item.children.filter(it => it.name &&
+       !it.hideInMenu).length !== 0 && item.children.some(child => child.name)) {
+      return (
+        <SubMenu
+          title={
+            item.icon ? (
+              <span>
+                {getIcon(item.icon)}
+                <span>{item.name}</span>
+              </span>
+            ) : item.name
+            }
+          key={item.path}
+        >
+          {this.getNavMenuItems(item.children)}
+        </SubMenu>
+      );
+    } else {
+      return (
+        <Menu.Item key={item.path}>
+          {this.getMenuItemPath(item)}
+        </Menu.Item>
+      );
+    }
+  }
+  /**
+  * 获得菜单子节点
+  * @memberof SiderMenu
+  */
+  getNavMenuItems = (menusData) => {
+    if (!menusData) {
+      return [];
+    }
+    return menusData
+      .filter(item => item.name && !item.hideInMenu)
+      .map((item) => {
+        if (item.name === '首页') {
+          return this.getNavMenuItems(item.children);
         } else {
-          itemPath = `${parentPath}/${item.path || ''}`.replace(/\/+/g, '/');
+          const ItemDom = this.getSubMenuOrItem(item);
+          return ItemDom;
         }
-        if (item.children && item.children.some(child => child.name)) {
-          const child = item.children.filter(route => route.isshow);
-          if (child.length !== 0) {
-            return (
-              <SubMenu
-                title={
-                      item.icon ? (
-                        <span>
-                          <Icon type={item.icon} />
-                          <span>{item.name}</span>
-                        </span>
-                      ) : item.name
-                    }
-                key={item.key || item.path}
-              >
-                {this.getNavMenuItems(item.children, itemPath)}
-              </SubMenu>
-            );
-          }
-        }
-        const icon = item.icon && <Icon type={item.icon} />;
-        if (item.isshow) {
-          return (
-            <Menu.Item key={item.key || item.path}>
-              {
-                    /^https?:\/\//.test(itemPath) ? (
-                      <a href={itemPath} target={item.target}>
-                        {icon}<span>{item.name}</span>
-                      </a>
-                    ) : (
-                      <Link
-                        to={itemPath}
-                        target={item.target}
-                        replace={itemPath === this.props.location.pathname}
-                      >
-                        {icon}<span>{item.name}</span>
-                      </Link>
-                    )
-                  }
-            </Menu.Item>
-          );
-        }
-      });
-    }
-
-
-    getNoticeData() {
-      const { notices = [] } = this.props;
-      if (notices.length === 0) {
-        return {};
-      }
-      const newNotices = notices.map((notice) => {
-        const newNotice = { ...notice };
-        if (newNotice.datetime) {
-          newNotice.datetime = moment(notice.datetime).fromNow();
-        }
-        // transform id to item key
-        if (newNotice.id) {
-          newNotice.key = newNotice.id;
-        }
-        if (newNotice.extra && newNotice.status) {
-          const color = ({
-            todo: '',
-            processing: 'blue',
-            urgent: 'red',
-            doing: 'gold',
-          })[newNotice.status];
-          newNotice.extra = <Tag color={color} style={{ marginRight: 0 }}>{newNotice.extra}</Tag>;
-        }
-        return newNotice;
-      });
-      return groupBy(newNotices, 'type');
-    }
-handleOpenChange = (openKeys) => {
-  const lastOpenKey = openKeys[openKeys.length - 1];
-  const isMainMenu = this
-    .menus
-    .some(item => lastOpenKey && (item.key === lastOpenKey || item.path === lastOpenKey));
-  this.setState({
-    openKeys: isMainMenu
-      ? [lastOpenKey]
-      : [...openKeys],
-  });
-}
-  handleNoticeClear = (type) => {
-    message.success(`清空了${type}`);
-    this.props.dispatch({
-      type: 'global/clearNotices',
-      payload: type,
-    });
-  }
-  handleNoticeVisibleChange = (visible) => {
-    if (visible) {
-      this.props.dispatch({
-        type: 'global/fetchNotices',
-      });
-    }
-  }
-  handleMenuClick = ({ key }) => {
-    if (key === 'logout') {
-      this.props.dispatch({
-        type: 'login/logout',
-      });
-    }
-  }
-  toggle = () => {
-    const { collapsed } = this.props;
-    this.props.dispatch({
-      type: 'global/changeLayoutCollapsed',
-      payload: !collapsed,
-    });
-    this.triggerResizeEvent();
+      })
+      .filter(item => !!item);
   }
   @Debounce(600)
   triggerResizeEvent() { // eslint-disable-line
@@ -192,10 +205,37 @@ handleOpenChange = (openKeys) => {
     event.initEvent('resize', true, false);
     window.dispatchEvent(event);
   }
+  toggle = () => {
+    const { collapsed, onCollapse } = this.props;
+    onCollapse(!collapsed);
+    this.triggerResizeEvent();
+  }
+  // conversion Path
+  // 转化路径
+  conversionPath=(path) => {
+    if (path && path.indexOf('http') === 0) {
+      return path;
+    } else {
+      return `/${path || ''}`.replace(/\/+/g, '/');
+    }
+  }
+  handleOpenChange = (openKeys) => {
+    const lastOpenKey = openKeys[openKeys.length - 1];
+    const isMainMenu = this.menus.some(
+      item => lastOpenKey && (item.key === lastOpenKey || item.path === lastOpenKey)
+    );
+    this.setState({
+      openKeys: isMainMenu ? [lastOpenKey] : [...openKeys],
+    });
+  }
+
   render() {
     const {
       currentUser, fetchingNotices,
+      location: { pathname },
     } = this.props;
+
+    const { openKeys } = this.state;
     const menu = (
       <Menu className={styles.menu} selectedKeys={[]} onClick={this.handleMenuClick}>
         <Menu.Item disabled><Icon type="user" />个人中心</Menu.Item>
@@ -205,6 +245,10 @@ handleOpenChange = (openKeys) => {
       </Menu>
     );
     const noticeData = this.getNoticeData();
+    let selectedKeys = this.getSelectedMenuKeys(pathname);
+    if (!selectedKeys.length) {
+      selectedKeys = [openKeys[openKeys.length - 1]];
+    }
     return (
       <Header className={styles.header}>
 
@@ -270,7 +314,7 @@ handleOpenChange = (openKeys) => {
         <Menu
           mode="horizontal"
           onOpenChange={this.handleOpenChange}
-          selectedKeys={this.getCurrentMenuSelectedKeys()}
+          selectedKeys={selectedKeys}
           style={{ padding: '12px 0', height: '64px' }}
         >
           {this.getNavMenuItems(this.menus)}
