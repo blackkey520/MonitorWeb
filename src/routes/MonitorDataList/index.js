@@ -1,12 +1,14 @@
 // import liraries
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import { Table, Radio, Select, Cascader, Input, Card } from 'antd';
+import { Table, Radio, Select, Cascader, Input, Card, Modal } from 'antd';
 import moment from 'moment';
 import { routerRedux } from 'dva/router';
 import city from '../../utils/city';
 import styles from './index.less';
 import BreadcrumbHeader from '../../components/BreadcrumbHeader';
+import MonitorDetail from '../../components/MonitorDetail';
+import { getRoutes } from '../../utils/utils';
 
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
@@ -15,16 +17,19 @@ const InputGroup = Input.Group;
 const Search = Input.Search;
 
 
-@connect(({ loading, monitor, global }) => ({
+@connect(({ loading, monitor, global, points }) => ({
   ...loading,
   columns: monitor.columns,
   data: monitor.data,
+  showdetail: points.showdetail,
+  selpoint: points.selpoint,
   pollutanttype: global.pollutanttype,
 }))
 class MonitorDataList extends Component {
   render() {
     const SCREEN_HEIGHT = document.querySelector('body').offsetHeight;
-    const { location, data, columns, pollutanttype, effects } = this.props;
+    const SCREEN_WIDTH = document.querySelector('body').offsetWidth;
+    const { location, data, columns, pollutanttype, effects, match, routerData } = this.props;
     const { payload = {}, pathname } = location;
     const listProps = {
       dataSource: data,
@@ -37,6 +42,8 @@ class MonitorDataList extends Component {
       },
       bordered: true,
     };
+    const routes = getRoutes(match.path, routerData);
+
     return (
       <div
         style={{ width: '100%',
@@ -111,8 +118,35 @@ class MonitorDataList extends Component {
           </div>}
 
         >
-          <Table {...listProps} />
+          <Table
+            {...listProps}
+            onRow={record => ({
+              onClick: () => {
+                this.props.dispatch({
+                  type: 'points/showdetail',
+                  payload: record.point,
+                });
+              },
+            })}
+          />
+
         </Card >
+        <Modal
+          title={this.props.selpoint}
+          visible={this.props.showdetail}
+          width={SCREEN_WIDTH - 40}
+          style={{ top: 20 }}
+          bodyStyle={{ padding: 5 }}
+          onCancel={() => {
+            this.props.dispatch({
+                  type: 'points/hidedetail',
+                });
+          }}
+          footer={null}
+        >
+          <MonitorDetail {...this.props} />
+        </Modal>
+
       </div>
     );
   }

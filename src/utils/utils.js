@@ -94,16 +94,16 @@ export function digitUppercase(n) {
 }
 
 function getRelation(str1, str2) {
-  // if (str1 === str2) {
-  //   console.warn('Two path are equal!');  // eslint-disable-line
-  // }
-  // const arr1 = str1.split('/');
-  // const arr2 = str2.split('/');
-  // if (arr2.every((item, index) => item === arr1[index])) {
-  //   return 1;
-  // } else if (arr1.every((item, index) => item === arr2[index])) {
-  //   return 2;
-  // }
+  if (str1 === str2) {
+    console.warn('Two path are equal!');  // eslint-disable-line
+  }
+  const arr1 = str1.split('/');
+  const arr2 = str2.split('/');
+  if (arr2.every((item, index) => item === arr1[index])) {
+    return 1;
+  } else if (arr1.every((item, index) => item === arr2[index])) {
+    return 2;
+  }
   return 3;
 }
 

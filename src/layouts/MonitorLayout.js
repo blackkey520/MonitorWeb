@@ -13,8 +13,7 @@ import NotFound from '../routes/Exception/404';
 import config from '../config';
 import { getRoutes } from '../utils/utils';
 import { getMenuData } from '../common/menu';
-import AuthorizedRoute from '../components/AuthorizedRoute';
-
+import AuthorizedRoute from '../components/AuthorizedRoute'; 
 /**
  * 根据菜单取得重定向地址.
  */
@@ -127,7 +126,7 @@ class MonitorLayout extends React.PureComponent {
       const {
         currentUser, collapsed, fetchingNotices, notices, match, navData, location, dispatch, routerData,
       } = this.props;
-      const bashRedirect = this.getBashRedirect();
+      const bashRedirect = this.getBashRedirect(); 
       const layout = (
         <Layout className="layout">
           <MonitorHeader
@@ -150,7 +149,7 @@ class MonitorLayout extends React.PureComponent {
                   )
                 }
                 {
-                  getRoutes(match.path, routerData).filter(item => item.path !== '/monitor/list/:pointid').map((item) => {
+                  getRoutes(match.path, routerData).map((item) => { 
                     return (
                       <AuthorizedRoute
                         key={item.key}
@@ -161,7 +160,6 @@ class MonitorLayout extends React.PureComponent {
                     );
                   })
                 }
-                <Route exact path="/monitor/list/:pointid" component={routerData['/monitor/list/:pointid'].component} />
                 <Redirect exact from="/" to={bashRedirect} />
                 <Route render={NotFound} />
               </Switch>

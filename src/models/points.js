@@ -11,6 +11,23 @@ export default Model.extend({
     pollutant: {},
     hourtendency: [],
     selectpoint: [],
+    showdetail: false,
+    selpoint: null,
+  },
+  reducers: {
+    showdetail(state, { payload }) {
+      return {
+        ...state,
+        showdetail: true,
+        selpoint: payload,
+      };
+    },
+    hidedetail(state, { payload }) {
+      return {
+        ...state,
+        showdetail: false,
+      };
+    },
   },
   effects: {
     * querypointlastdata({

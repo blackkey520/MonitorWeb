@@ -9,6 +9,7 @@ export default Model.extend({
   state: {
     columns: [],
     data: [],
+    isshow: false,
   },
   effects: {
     * querydata({
@@ -20,6 +21,7 @@ export default Model.extend({
         payload.pollutantType = pollutanttype[0].ID;
       }
       const columnpollutant = yield call(loadPollutant, payload);
+      const _this=this;
       const columns = [
         {
           title: '状态',
@@ -33,7 +35,6 @@ export default Model.extend({
           title: '监测点',
           width: 300,
           dataIndex: 'point',
-          render: (text, record) => <Link to={`/monitor/list/${record.DGIMN}`} >{text}</Link>,
           key: 'point',
           fixed: columnpollutant.data.length > 5 ? 'left' : false,
         },

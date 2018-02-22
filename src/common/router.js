@@ -75,27 +75,7 @@ export const getRouterData = (app) => {
       component: dynamicWrapper(app, ['user', 'login'], () => import('../layouts/MonitorLayout')),
     },
     '/monitor/list': {
-      component: dynamicWrapper(app, ['monitor', 'login'], () => import('../routes/MonitorDataList')),
-    },
-    '/monitor/list/:pointid': {
-      name: '监控详情',
-      component: dynamicWrapper(app, [], () => import('../routes/MonitorDetail')),
-    },
-    '/monitor/list/:pointid/realtime': {
-      name: '监控详情',
-      component: dynamicWrapper(app, [], () => import('../routes/MonitorDetail/RealTimeData')),
-    },
-    '/monitor/list/:pointid/minute': {
-      name: '监控详情',
-      component: dynamicWrapper(app, [], () => import('../routes/MonitorDetail/MinuteData')),
-    },
-    '/monitor/list/:pointid/hour': {
-      name: '监控详情',
-      component: dynamicWrapper(app, [], () => import('../routes/MonitorDetail/HourData')),
-    },
-    '/monitor/list/:pointid/day': {
-      name: '监控详情',
-      component: dynamicWrapper(app, [], () => import('../routes/MonitorDetail/DayData')),
+      component: dynamicWrapper(app, ['monitor', 'points'], () => import('../routes/MonitorDataList')),
     },
     '/monitor/map': {
       component: dynamicWrapper(app, ['points'], () => import('../routes/MonitorDataMap')),
