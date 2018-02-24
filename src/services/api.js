@@ -77,3 +77,13 @@ export async function loadMonitorPoint(params) {
   const result = await get('/api/rest/OutputAsPointApi/GetPointsByPollutantType/', body, null);
   return result;
 }
+export async function loadPointDetail(params) {
+  const body = {
+    dgimn: params.dgimn,
+    fileLength: params.fileLength,
+    width: params.width,
+    height: '',
+  };
+  const result = await get('/api/rest/OutputAsPointApi/GetPointBaseInfo/', body, null);
+  return result;
+}

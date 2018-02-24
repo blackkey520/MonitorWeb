@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { loadMonitorPoint, loadLastdata, loadMonitorDatalist } from '../services/api';
+import { loadMonitorPoint, loadLastdata, loadMonitorDatalist, loadPointDetail } from '../services/api';
 import { Model } from '../dvapack';
 
 
@@ -15,13 +15,6 @@ export default Model.extend({
     selpoint: null,
   },
   reducers: {
-    showdetail(state, { payload }) {
-      return {
-        ...state,
-        showdetail: true,
-        selpoint: payload,
-      };
-    },
     hidedetail(state, { payload }) {
       return {
         ...state,
@@ -30,6 +23,12 @@ export default Model.extend({
     },
   },
   effects: {
+    * querypointdetail({
+      payload,
+    }, { call, update, put }) {
+      const { data } = yield call(loadPointDetail, { dgimn: payload.DGIMN, fileLength: 50000, width: 300 });
+      yield update({ selpoint: data, showdetail: true });
+    },
     * querypointlastdata({
       payload,
     }, { call, update, put }) {

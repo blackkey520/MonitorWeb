@@ -34,7 +34,7 @@ class MonitorDataList extends Component {
     const listProps = {
       dataSource: data,
       columns,
-      loading: effects['monitor/querydata'],
+      loading: effects['monitor/querypointdetail'],
       pagination: false,
       scroll: {
         y: SCREEN_HEIGHT - 300,
@@ -115,7 +115,7 @@ class MonitorDataList extends Component {
               style={{ width: 270, marginLeft: 10 }}
               onSearch={value => console.log(value)}
             />
-          </div>}
+                 </div>}
 
         >
           <Table
@@ -123,8 +123,8 @@ class MonitorDataList extends Component {
             onRow={record => ({
               onClick: () => {
                 this.props.dispatch({
-                  type: 'points/showdetail',
-                  payload: record.point,
+                  type: 'points/querypointdetail',
+                  payload: record,
                 });
               },
             })}
@@ -132,7 +132,7 @@ class MonitorDataList extends Component {
 
         </Card >
         <Modal
-          title={this.props.selpoint}
+          title={this.props.selpoint !== null ? `${this.props.selpoint.Point.TargetName}-${this.props.selpoint.Point.PointName}` : '详细信息'}
           visible={this.props.showdetail}
           width={SCREEN_WIDTH - 40}
           style={{ top: 20 }}
