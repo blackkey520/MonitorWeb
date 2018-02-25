@@ -9,7 +9,6 @@ export default Model.extend({
   state: {
     columns: [],
     data: [],
-    isshow: false,
   },
   effects: {
     * querydata({

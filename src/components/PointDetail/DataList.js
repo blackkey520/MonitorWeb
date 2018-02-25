@@ -1,6 +1,8 @@
 // import liraries
 import React, {Component} from 'react';
 import {connect} from 'dva';
+import { Table } from 'antd';
+
 
 @connect(({loading, monitor, global}) => ({
     ...loading,
@@ -10,6 +12,7 @@ import {connect} from 'dva';
 }))
 class DataList extends Component {
     render() {
+         
         return (
             <div
                 style={{

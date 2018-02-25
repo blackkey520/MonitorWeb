@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { loadMonitorPoint, loadLastdata, loadMonitorDatalist, loadPointDetail } from '../services/api';
+import { loadMonitorPoint, loadLastdata, loadMonitorDatalist, loadPointDetail, } from '../services/api';
 import { Model } from '../dvapack';
 
 
@@ -11,23 +11,33 @@ export default Model.extend({
     pollutant: {},
     hourtendency: [],
     selectpoint: [],
-    showdetail: false,
     selpoint: null,
-  },
-  reducers: {
-    hidedetail(state, { payload }) {
-      return {
-        ...state,
-        showdetail: false,
-      };
-    },
+    columns: [],
+    data: [],
   },
   effects: {
     * querypointdetail({
       payload,
     }, { call, update, put }) {
       const { data } = yield call(loadPointDetail, { dgimn: payload.DGIMN, fileLength: 50000, width: 300 });
-      yield update({ selpoint: data, showdetail: true });
+      yield update({ selpoint: data });
+      yield put({
+        type: 'querypointdata',
+        payload: { dgimn: payload.DGIMN,pollutant: data.PollutantTypeInfo[0].PolluntCode,querydate:[moment().add(10, 'm'), moment()],monitortype:'realtime' },
+      });
+    },
+    * querypointdata({
+      payload,
+    }, { call, update, put,select }) {
+      const result = yield call(loadMonitorDatalist, { PollutantCode: payload.pollutant,
+        DGIMN: payload.dgimn,
+        BeginTime: payload.querydate[0].format('YYYY-MM-DD HH:mm:ss'),
+        EndTime: payload.querydate[1].format('YYYY-MM-DD HH:mm:ss'),
+        pageIndex: 1,
+        pageSize: 1000,
+        dataType: payload.monitortype,
+      });
+      debugger;
     },
     * querypointlastdata({
       payload,

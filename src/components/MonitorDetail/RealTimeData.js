@@ -5,12 +5,6 @@ import { Row, Col } from 'antd';
 import DataList from '../PointDetail/DataList';
 import LineChart from '../PointDetail/LineChart';
 
-@connect(({ loading, monitor, global }) => ({
-  ...loading,
-  columns: monitor.columns,
-  data: monitor.data,
-  pollutanttype: global.pollutanttype,
-}))
 class RealTimeData extends Component {
   render() {
     return (

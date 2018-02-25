@@ -1,7 +1,7 @@
 // import liraries
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import { Table, Radio, Select, Cascader, Input, Card, Modal } from 'antd';
+import { Table, Radio, Select, Cascader, Input, Card, Modal,Spin } from 'antd';
 import moment from 'moment';
 import { routerRedux } from 'dva/router';
 import city from '../../utils/city';
@@ -21,11 +21,17 @@ const Search = Input.Search;
   ...loading,
   columns: monitor.columns,
   data: monitor.data,
-  showdetail: points.showdetail,
   selpoint: points.selpoint,
   pollutanttype: global.pollutanttype,
 }))
 class MonitorDataList extends Component {
+  constructor(props) {
+    super(props);
+    this.menus = props.menuData;
+    this.state = {
+      showdetail:false,
+    };
+  }
   render() {
     const SCREEN_HEIGHT = document.querySelector('body').offsetHeight;
     const SCREEN_WIDTH = document.querySelector('body').offsetWidth;
@@ -122,6 +128,9 @@ class MonitorDataList extends Component {
             {...listProps}
             onRow={record => ({
               onClick: () => {
+                this.setState({
+                  showdetail:true
+                });
                 this.props.dispatch({
                   type: 'points/querypointdetail',
                   payload: record,
@@ -133,18 +142,19 @@ class MonitorDataList extends Component {
         </Card >
         <Modal
           title={this.props.selpoint !== null ? `${this.props.selpoint.Point.TargetName}-${this.props.selpoint.Point.PointName}` : '详细信息'}
-          visible={this.props.showdetail}
+          visible={this.state.showdetail}
           width={SCREEN_WIDTH - 40}
           style={{ top: 20 }}
           bodyStyle={{ padding: 5 }}
           onCancel={() => {
-            this.props.dispatch({
-                  type: 'points/hidedetail',
-                });
+            this.setState({
+              showdetail:false
+            });
           }}
           footer={null}
         >
-          <MonitorDetail {...this.props} />
+          {effects['points/querypointdetail']?<Spin style={{width: '100%',
+        height: 'calc(100vh - 260px)',marginTop:130 }} size="large" />:<MonitorDetail {...this.props} />}
         </Modal>
 
       </div>
