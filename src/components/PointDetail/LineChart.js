@@ -15,7 +15,7 @@ class LineChart extends Component {
                 style={{
                 width: '100%',
                 height: 'calc((100vh - 180px)/2',
-                backgroundColor:'blue'
+                backgroundColor:'#fff'
             }}>
                 {'曲线图'}
             </div>

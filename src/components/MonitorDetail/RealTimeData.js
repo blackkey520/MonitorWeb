@@ -10,21 +10,11 @@ class RealTimeData extends Component {
     return (
       <div
         style={{ width: '100%',
-      height: 'calc(100vh - 120px)' }}
+      height: 'calc(100vh - 120px)', }}
       >
         <Row gutter={8}>
-          <Col >
-            <div style={{ backgroundColor: 'red' }} >
-              <LineChart />
-            </div>
-          </Col>
-        </Row>
-        <Row gutter={8}>
-          <Col >
-            <div style={{ backgroundColor: 'blue' }} >
-              <DataList />
-            </div>
-          </Col>
+          <Col span={20} ><LineChart  /></Col>
+          <Col span={4} > <DataList /></Col>
         </Row>
       </div>
     );

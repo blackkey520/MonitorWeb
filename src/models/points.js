@@ -14,6 +14,12 @@ export default Model.extend({
     selpoint: null,
     columns: [],
     data: [],
+    total:0,
+    size:10,
+    current:1,
+    querydate:[],
+    monitortype:'realtime',
+    selpollutant:null,
   },
   effects: {
     * querypointdetail({
@@ -23,21 +29,31 @@ export default Model.extend({
       yield update({ selpoint: data });
       yield put({
         type: 'querypointdata',
-        payload: { dgimn: payload.DGIMN,pollutant: data.PollutantTypeInfo[0].PolluntCode,querydate:[moment().add(10, 'm'), moment()],monitortype:'realtime' },
+        payload: { dgimn: payload.DGIMN,pollutant: data.PollutantTypeInfo[0].PolluntCode,querydate:[moment().add(-30, 'm'), moment()],monitortype:'realtime',current:1 },
       });
     },
     * querypointdata({
       payload,
     }, { call, update, put,select }) {
+      const { size } = yield select(_ => _.points);
+      
       const result = yield call(loadMonitorDatalist, { PollutantCode: payload.pollutant,
         DGIMN: payload.dgimn,
         BeginTime: payload.querydate[0].format('YYYY-MM-DD HH:mm:ss'),
         EndTime: payload.querydate[1].format('YYYY-MM-DD HH:mm:ss'),
-        pageIndex: 1,
-        pageSize: 1000,
+        pageIndex: payload.current,
+        pageSize: size,
         dataType: payload.monitortype,
       });
-      debugger;
+      let resultdata=[];
+      if(payload.current!=1)
+      {
+        const { data } = yield select(_ => _.points);
+        resultdata=data.concat(result.data);
+      }else{
+        resultdata=result.data;
+      }
+      yield update({data:resultdata,total:result.total,current:payload.current,querydate:payload.querydate,monitortype:payload.monitortype,selpollutant:payload.pollutant});
     },
     * querypointlastdata({
       payload,
@@ -46,7 +62,7 @@ export default Model.extend({
 
       yield update({
         selectpoint: payload.itemdata,
-        lastdata,
+        lastdata, 
       });
       yield put({ type: 'queryhourtendency', payload: { pollutant: { PollutantCode: lastdata[0].PollutantCode, PollutantName: lastdata[0].PollutantName, Unit: lastdata[0].Unit } } });
     },

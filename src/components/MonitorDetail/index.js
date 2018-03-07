@@ -17,6 +17,7 @@ const RangePicker = DatePicker.RangePicker;
 @connect(({ loading, points }) => ({
   ...loading,
   selpoint: points.selpoint,
+  current:points.current,
 }))
 class MonitorDetail extends PureComponent {
   constructor(props) {
@@ -25,7 +26,7 @@ class MonitorDetail extends PureComponent {
     this.state = {
       monitortype:'realtime',
       dateformat:'YYYY-MM-DD HH:mm:ss',
-      querydate:[moment().add(10, 'm'), moment()],
+      querydate:[moment().add(-30, 'm'), moment()],
       pollutant:props.selpoint.PollutantTypeInfo[0].PolluntCode,
     };
     
@@ -35,27 +36,27 @@ class MonitorDetail extends PureComponent {
     {
       this.setState({
         monitortype:key,
-        querydate:[moment().add(10, 'm'), moment()],
+        querydate:[moment().add(-30, 'm'), moment()],
         dateformat:'YYYY-MM-DD HH:mm:ss',
       });
     }else if(key==='minute'){
       this.setState({
         monitortype:key,
-        querydate:[moment().add(12, 'h'), moment()],
+        querydate:[moment().add(-12, 'h'), moment()],
         dateformat:'YYYY-MM-DD HH:mm:00',
       });
     }else if(key==='hour')
     {
       this.setState({
         monitortype:key,
-        querydate:[moment().add(24, 'h'), moment()],
+        querydate:[moment().add(-24, 'h'), moment()],
         dateformat:'YYYY-MM-DD HH:00:00',
       });
     }else if(key==='day')
     {
       this.setState({
         monitortype:key,
-        querydate:[moment().add(1, 'M'), moment()],
+        querydate:[moment().add(-1, 'M'), moment()],
         dateformat:'YYYY-MM-DD 00:00:00',
       });
     }
@@ -63,6 +64,7 @@ class MonitorDetail extends PureComponent {
       type: 'points/querypointdata',
       payload:{
         dgimn: this.props.selpoint.Point.Dgimn,
+        current:1,
         ...this.state
       },
     });
@@ -75,11 +77,12 @@ class MonitorDetail extends PureComponent {
       type: 'points/querypointdata',
       payload:{
         dgimn: this.props.selpoint.Point.Dgimn,
+        current:1,
         ...this.state
       },
     });
   }
-  onPollutantCVhange=(value) => {
+  onPollutantChange=(value) => {
     this.setState({
       pollutant:value,
     });
@@ -87,6 +90,7 @@ class MonitorDetail extends PureComponent {
       type: 'points/querypointdata',
       payload:{
         dgimn: this.props.selpoint.Point.Dgimn,
+        current:1,
         ...this.state
       },
     });
@@ -102,7 +106,7 @@ class MonitorDetail extends PureComponent {
           onChange={this.onChange}
           tabBarExtraContent={
             <div>
-              <Select value={this.state.pollutant} style={{ width: 120 }} onChange={this.onPollutantCVhange}>
+              <Select value={this.state.pollutant} style={{ width: 120 }} onChange={this.onPollutantChange}>
                 {
                   selpoint.PollutantTypeInfo.map((item, key) => {
                     return <Option key={key} value={item.PolluntCode}>{item.PolluntName}</Option>;

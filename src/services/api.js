@@ -22,13 +22,16 @@ export async function loadLastdata(params) {
 }
 export async function loadMonitorDatalist(params) {
   const body = {
-    PollutantCode: params.PollutantCode,
     DGIMN: params.DGIMN,
     BeginTime: params.BeginTime,
     EndTime: params.EndTime,
     pageIndex: params.pageIndex,
     pageSize: params.pageSize,
   };
+  if(params.PollutantCode)
+  {
+    body.PollutantCode=params.PollutantCode;
+  }
   let url = '';
   if (params.dataType === 'realtime') {
     url = '/api/rest/RealTime/GetRealTimeData/';
