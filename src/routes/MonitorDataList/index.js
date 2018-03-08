@@ -40,7 +40,7 @@ class MonitorDataList extends Component {
     const listProps = {
       dataSource: data,
       columns,
-      loading: effects['monitor/querypointdetail'],
+      loading: effects['monitor/querydata'],
       pagination: false,
       scroll: {
         y: SCREEN_HEIGHT - 300,
