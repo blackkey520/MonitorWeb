@@ -228,98 +228,105 @@ export default class MonitorHeader extends PureComponent {
       openKeys: isMainMenu ? [lastOpenKey] : [...openKeys],
     });
   }
+handleMenuClick = ({ key }) => {
 
-  render() {
-    const {
-      currentUser, fetchingNotices,
-      location: { pathname },
-    } = this.props;
+  if (key === 'logout') {
+    this.props.dispatch({
+      type: 'login/logout',
+    });
+  }
+}
+render() {
+  const {
+    currentUser, fetchingNotices,
+    location: { pathname },
+  } = this.props;
 
-    const { openKeys } = this.state;
-    const menu = (
-      <Menu className={styles.menu} selectedKeys={[]} onClick={this.handleMenuClick}>
-        <Menu.Item disabled><Icon type="user" />个人中心</Menu.Item>
-        <Menu.Item disabled><Icon type="setting" />设置</Menu.Item>
-        <Menu.Divider />
-        <Menu.Item key="logout"><Icon type="logout" />退出登录</Menu.Item>
-      </Menu>
-    );
-    const noticeData = this.getNoticeData();
-    let selectedKeys = this.getSelectedMenuKeys(pathname);
-    if (!selectedKeys.length) {
-      selectedKeys = [openKeys[openKeys.length - 1]];
-    }
-    return (
-      <Header className={styles.header}>
+  const { openKeys } = this.state;
+  const menu = (
+    <Menu className={styles.menu} selectedKeys={[]} onClick={this.handleMenuClick}>
+      <Menu.Item disabled><Icon type="user" />个人中心</Menu.Item>
+      <Menu.Item disabled><Icon type="setting" />设置</Menu.Item>
+      <Menu.Divider />
+      <Menu.Item key="logout"><Icon type="logout" />退出登录</Menu.Item>
+    </Menu>
+  );
+  const noticeData = this.getNoticeData();
+  let selectedKeys = this.getSelectedMenuKeys(pathname);
+  if (!selectedKeys.length) {
+    selectedKeys = [openKeys[openKeys.length - 1]];
+  }
+  return (
+    <Header className={styles.header}>
 
-        <div className={styles.logo}>
+      <div className={styles.logo}>
 
-          <img src={logo} alt="logo" />
-          <h1>{config.name}</h1>
+        <img src={logo} alt="logo" />
+        <h1>{config.name}</h1>
 
 
-        </div>
+      </div>
 
-        <div className={styles.right}>
-          <HeaderSearch
-            className={`${styles.action} ${styles.search}`}
-            placeholder="站内搜索"
-            dataSource={['搜索提示一', '搜索提示二', '搜索提示三']}
-            onSearch={(value) => {
+      <div className={styles.right}>
+        <HeaderSearch
+          className={`${styles.action} ${styles.search}`}
+          placeholder="站内搜索"
+          dataSource={['搜索提示一', '搜索提示二', '搜索提示三']}
+          onSearch={(value) => {
                 console.log('input', value); // eslint-disable-line
                 }}
-            onPressEnter={(value) => {
+          onPressEnter={(value) => {
                 console.log('enter', value); // eslint-disable-line
                 }}
           />
-          <NoticeIcon
-            className={styles.action}
-            count={23}
-            onItemClick={(item, tabProps) => {
+        <NoticeIcon
+          className={styles.action}
+          count={23}
+          onItemClick={(item, tabProps) => {
                 console.log(item, tabProps); // eslint-disable-line
                 }}
-            onClear={this.handleNoticeClear}
-            onPopupVisibleChange={this.handleNoticeVisibleChange}
-            loading={fetchingNotices}
-            popupAlign={{ offset: [20, -16] }}
+          onClear={this.handleNoticeClear}
+          onPopupVisibleChange={this.handleNoticeVisibleChange}
+          loading={fetchingNotices}
+          popupAlign={{ offset: [20, -16] }}
           >
-            <NoticeIcon.Tab
-              list={noticeData['通知']}
-              title="通知"
-              emptyText="你已查看所有通知"
-              emptyImage="https://gw.alipayobjects.com/zos/rmsportal/wAhyIChODzsoKIOBHcBk.svg"
+          <NoticeIcon.Tab
+            list={noticeData['通知']}
+            title="通知"
+            emptyText="你已查看所有通知"
+            emptyImage="https://gw.alipayobjects.com/zos/rmsportal/wAhyIChODzsoKIOBHcBk.svg"
             />
-            <NoticeIcon.Tab
-              list={noticeData['消息']}
-              title="消息"
-              emptyText="您已读完所有消息"
-              emptyImage="https://gw.alipayobjects.com/zos/rmsportal/sAuJeJzSKbUmHfBQRzmZ.svg"
+          <NoticeIcon.Tab
+            list={noticeData['消息']}
+            title="消息"
+            emptyText="您已读完所有消息"
+            emptyImage="https://gw.alipayobjects.com/zos/rmsportal/sAuJeJzSKbUmHfBQRzmZ.svg"
             />
-            <NoticeIcon.Tab
-              list={noticeData['待办']}
-              title="待办"
-              emptyText="你已完成所有待办"
-              emptyImage="https://gw.alipayobjects.com/zos/rmsportal/HsIsxMZiWKrNUavQUXqx.svg"
+          <NoticeIcon.Tab
+            list={noticeData['待办']}
+            title="待办"
+            emptyText="你已完成所有待办"
+            emptyImage="https://gw.alipayobjects.com/zos/rmsportal/HsIsxMZiWKrNUavQUXqx.svg"
             />
-          </NoticeIcon>
-          {currentUser.User_Name ? (
-            <Dropdown overlay={menu}>
-              <span className={`${styles.action} ${styles.account}`}>
+        </NoticeIcon>
+        {currentUser.User_Name ? (
+          <Dropdown overlay={menu}>
+            <span className={`${styles.action} ${styles.account}`}>
                 <Avatar size="small" className={styles.avatar} src="https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png" />
                 {currentUser.User_Name}
               </span>
-            </Dropdown>
+          </Dropdown>
             ) : <Spin size="small" style={{ marginLeft: 8 }} />}
-        </div>
-        <Menu
-          mode="horizontal"
-          onOpenChange={this.handleOpenChange}
-          selectedKeys={selectedKeys}
-          style={{ padding: '12px 0', height: '64px' }}
+      </div>
+      <Menu
+        mode="horizontal"
+        onOpenChange={this.handleOpenChange}
+        selectedKeys={selectedKeys}
+        style={{ padding: '12px 0', height: '64px' }}
         >
-          {this.getNavMenuItems(this.menus)}
-        </Menu>
-      </Header>
-    );
-  }
+        {this.getNavMenuItems(this.menus)}
+      </Menu>
+    </Header>
+  );
+}
 }

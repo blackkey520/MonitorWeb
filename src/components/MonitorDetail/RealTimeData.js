@@ -13,8 +13,8 @@ class RealTimeData extends Component {
       height: 'calc(100vh - 120px)', }}
       >
         <Row gutter={8}>
-          <Col span={20} ><LineChart  /></Col>
-          <Col span={4} > <DataList /></Col>
+          <Col span={19} ><LineChart  /></Col>
+          <Col span={5} > <DataList /></Col>
         </Row>
       </div>
     );

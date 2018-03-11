@@ -15,11 +15,12 @@ export default Model.extend({
     columns: [],
     data: [],
     total: 0,
-    size: 10,
+    size: 30,
     current: 1,
     querydate: [],
     monitortype: 'realtime',
     selpollutant: null,
+    dateformat: 'YYYY-MM-DD HH:mm:ss',
   },
   effects: {
     * querypointdetail({
@@ -29,36 +30,61 @@ export default Model.extend({
       yield update({ selpoint: data });
       yield put({
         type: 'querypointdata',
-        payload: { dgimn: payload.DGIMN, pollutant: data.PollutantTypeInfo[0].PolluntCode, querydate: [moment().add(-30, 'm'), moment()], monitortype: 'realtime', current: 1 },
+        payload: { dgimn: payload.DGIMN, pollutant: data.PollutantTypeInfo[0].PolluntCode, querydate: [moment().add(-30, 'm'), moment()], monitortype: 'realtime', current: 1, dateformat: 'YYYY-MM-DD HH:mm:ss' },
       });
     },
     * querypointdata({
       payload,
     }, { call, update, put, select }) {
-      const { size } = yield select(_ => _.points);
 
+      const { size } = yield select(_ => _.points);
       const result = yield call(loadMonitorDatalist, { PollutantCode: payload.pollutant,
         DGIMN: payload.dgimn,
-        BeginTime: payload.querydate[0].format('YYYY-MM-DD HH:mm:ss'),
-        EndTime: payload.querydate[1].format('YYYY-MM-DD HH:mm:ss'),
+        BeginTime: payload.querydate[0].format(payload.dateformat),
+        EndTime: payload.querydate[1].format(payload.dateformat),
         pageIndex: payload.current,
         pageSize: size,
         dataType: payload.monitortype,
       });
       let resultdata = [];
+      const resultda = [];
+      if (result.data !== null)
+      {
+        result.data.map((item, key) => {
+          if (payload.monitortype === 'realtime')
+          {
+            resultda.push(item);
+          } else if (payload.monitortype === 'minute')
+          {
+            item.MonitorValue = item.AvgValue;
+            resultda.push(item);
+          } else if (payload.monitortype === 'hour')
+          {
+            item.MonitorValue = item.AvgValue;
+            item.MonitorTime = moment(item.MonitorTime).format('YYYY-MM-DD HH');
+            resultda.push(item);
+          }
+          else if (payload.monitortype === 'day')
+          {
+            item.MonitorValue = item.AvgValue;
+            item.MonitorTime = moment(item.MonitorTime).format('YYYY-MM-DD');
+            resultda.push(item);
+          }
+        });
+      }
+
       if (payload.current != 1) {
         const { data } = yield select(_ => _.points);
-        resultdata = data.concat(result.data);
+        resultdata = data.concat(resultda);
       } else {
-        resultdata = result.data;
+        resultdata = resultda;
       }
-      yield update({ data: resultdata, total: result.total, current: payload.current, querydate: payload.querydate, monitortype: payload.monitortype, selpollutant: payload.pollutant });
+      yield update({ data: resultdata, total: result.total, current: payload.current, querydate: payload.querydate, monitortype: payload.monitortype, selpollutant: payload.pollutant, dateformat: payload.dateformat });
     },
     * querypointlastdata({
       payload,
     }, { call, update, put }) {
       const { data: { RealtimeData: lastdata } } = yield call(loadLastdata, { dgimn: payload.itemdata.dgimn });
-
       yield update({
         selectpoint: payload.itemdata,
         lastdata,
