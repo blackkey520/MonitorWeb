@@ -49,7 +49,7 @@ class MonitorDataList extends Component {
       bordered: true,
     };
     const routes = getRoutes(match.path, routerData);
-
+    debugger;
     return (
       <div
         style={{ width: '100%',
@@ -65,7 +65,7 @@ class MonitorDataList extends Component {
             }
           }
           title={<BreadcrumbHeader />}
-          extra={<div >
+          extra={<div>
             <RadioGroup
               onChange={({ target }) => {
         let time = moment().format('YYYY-MM-DD HH:mm:ss');

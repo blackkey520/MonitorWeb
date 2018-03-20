@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { Icon } from 'antd';
-import { loadPollutantType, loadPollutant, loadMonitoroverView } from '../services/api';
+import { loadPollutantType, loadPollutant, loadMonitoroverView,loadCountryPointView } from '../services/api';
 import { Model } from '../dvapack';
 import { Link } from 'dva/router';
 
@@ -36,6 +36,7 @@ export default Model.extend({
           dataIndex: 'point',
           key: 'point',
           fixed: columnpollutant.data.length > 5 ? 'left' : false,
+          render: (text,record) => <span style={{fontWeight:record.pointType==='country'?'bold':''}}>{text}</span >,
         },
         {
           title: '监测时间',
@@ -43,6 +44,7 @@ export default Model.extend({
           dataIndex: 'datetime',
           key: 'datetime',
           fixed: columnpollutant.data.length > 5 ? 'left' : false,
+          render: (text,record) => <span style={{fontWeight:record.pointType==='country'?'bold':''}}>{text}</span >,
         },
       ];
 
@@ -67,17 +69,19 @@ export default Model.extend({
             return 0;
           },
           key: item.PollutantCode,
-          render: text => <span style={{ color: text ? text.split('|')[1] : '#666666' }}>{text ? text.split('|')[0] : '-'}</span >,
+          render: (text,record) => <span style={{ color: text ? text.split('|')[1] : '#666666',fontWeight:record.pointType==='country'?'bold':''}}>{text ? text.split('|')[0] : '-'}</span >,
         });
       });
+
       const result = yield call(loadMonitoroverView, payload);
       const data = [];
+      const GroupID=[];
       result.data.map((item, key) => {
         const dataitem = {
           DGIMN: item.DGIMN,
           status: item.status,
           point: `${item.pname}-${item.text}`,
-          datetime: item.Times,
+          datetime: item.Times
         };
         columns.map((columnsitem, columnskey) => {
           if (columnskey > 2) {
@@ -88,7 +92,32 @@ export default Model.extend({
         });
         dataitem.key = key + 1;
         data.push(dataitem);
+        if(GroupID.indexOf(item.GroupID)==-1&&item.GroupID!=null){
+          GroupID.push(item.GroupID);
+        }
+        payload.GroupID=GroupID;
       });
+      const results = yield call(loadCountryPointView, payload);
+      if(results){
+        results.data.map((item,key)=>{
+          const dataitem = {
+            DGIMN: item.DGIMN,
+            status: item.status,
+            point: item.text,
+            datetime: item.Times,
+            pointType:"country"
+          };
+          columns.map((columnsitem,columnskey)=>{
+            if(columnskey>2){
+              dataitem[columnsitem.key] = item[columnsitem.key]
+                ? `${item[columnsitem.key]}|${item[`${columnsitem.key}_color`]}`
+                : '-';
+            }
+          });
+          dataitem.key = data.length + 1;
+          data.push(dataitem);
+        });
+      }
 
       if (result) {
         yield update({ data, columns });
@@ -99,12 +128,13 @@ export default Model.extend({
     setup({ dispatch, history }) {
       return history.listen(({ pathname, payload }) => {
         if (pathname === '/monitor/list') {
-          const { pollutantType = null, searchTime = moment().format('YYYY-MM-DD'), monitortype = 'realtime' } = payload || {};
+          const { pollutantType = null, searchTime = moment().format('YYYY-MM-DD'), monitortype = 'realtime',GroupID=[] } = payload || {};
           dispatch({ type: 'querydata',
             payload: {
               pollutantType,
               searchTime,
               monitortype,
+              GroupID,
             },
           });
         }

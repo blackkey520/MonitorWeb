@@ -48,7 +48,7 @@ export async function loadMonitorDatalist(params) {
 export async function loadMonitoroverView(params) {
   const body = {
     pollutantType: params.pollutantType,
-    searchTime: '20                                                                                                                                                                                        18-01-04 10:00:00',
+    searchTime: '',
     GroupId: '',
   };
   let url;
@@ -88,5 +88,25 @@ export async function loadPointDetail(params) {
     height: '',
   };
   const result = await get('/api/rest/OutputAsPointApi/GetPointBaseInfo/', body, null);
+  return result;
+}
+export async function loadCountryPointView(params) {
+  const body = {
+    SearchTime:'',
+    GroupID:params.GroupID,
+    AQI:'',
+    PrimaryPollutantCode:''
+  };
+  let url;
+  if (params.monitortype === 'minute') {
+    url = '/api/rest/ControlData/GetLastHourData/';
+  } else if (params.monitortype === 'hour') {
+    url = '/api/rest/ControlData/GetLastHourData/';
+  } else if (params.monitortype === 'day') {
+    url = '/api/rest/ControlData/GetLastDayData/';
+  }else{
+    return null;
+  }
+  const result = await get(url, body, null);
   return result;
 }
