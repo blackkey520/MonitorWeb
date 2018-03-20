@@ -13,13 +13,14 @@ import LineChart from '../PointDetail/LineChart';
 }))
 class MinuteData extends Component {
   render() {
+  
     return (
       <div
         style={{ width: '100%',
       height: 'calc(100vh - 120px)', }}
       >
         <Row gutter={8}>
-          <Col span={19} ><LineChart  /></Col>
+          <Col span={19} ><LineChart  dataType={this.props.dataType}/></Col>
           <Col span={5} > <DataList /></Col>
         </Row>
       </div>

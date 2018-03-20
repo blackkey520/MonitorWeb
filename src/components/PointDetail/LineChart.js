@@ -1,15 +1,17 @@
 // import liraries
 import React, {Component} from 'react';
 import {connect} from 'dva';
+import FoldlineBar from '../Charts/foldline'
 
-@connect(({loading, monitor, global}) => ({
+@connect(({loading, monitor, global, points}) => ({
     ...loading,
     columns: monitor.columns,
-    data: monitor.data,
+    data: points.data,
     pollutanttype: global.pollutanttype
 }))
 class LineChart extends Component {
-    render() {
+
+    render() { 
         return (
             <div
                 style={{
@@ -17,7 +19,7 @@ class LineChart extends Component {
                 height: 'calc((100vh - 180px)/2',
                 backgroundColor:'#fff'
             }}>
-                {'曲线图'}
+            <FoldlineBar dataType={this.props.dataType}  data={this.props.data}/>
             </div>
         );
     }

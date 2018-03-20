@@ -124,17 +124,17 @@ class MonitorDetail extends PureComponent {
               />
             </div>}
           >
-          <TabPane tab="实时数据" key="realtime" >
-            <RealTimeData />
+          <TabPane tab="实时数据" key="realtime"  >
+            <RealTimeData  dataType={'realTime'}/>
           </TabPane>
-          <TabPane tab="分钟数据" key="minute" >
-            <MinuteData />
+          <TabPane tab="分钟数据" key="minute"  >
+            <MinuteData  dataType={'minute'}/>
           </TabPane>
           <TabPane tab="小时数据" key="hour" >
-            <HourData />
+            <HourData dataType={'hour'}/>
           </TabPane>
           <TabPane tab="日数据" key="day" >
-            <DayData />
+            <DayData dataType={'day'}/>
           </TabPane>
         </Tabs>
         {/* {this.props.match.params.pointid} */}
