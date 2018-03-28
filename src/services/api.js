@@ -61,9 +61,10 @@ export async function loadMonitorDatalist(params) {
 export async function loadMonitoroverView(params) {
   const body = {
     pollutantType: params.pollutantType,
-    searchTime: '',
     GroupId: '',
-  };
+    regionCode:params.regionCode,
+    keyWords:params.keyWords,
+  }; 
   let url;
   if (params.monitortype === 'realtime') {
     url = '/api/rest/OutputAsPointApi/GetPointNewRealTimeDataByPollutantType/';

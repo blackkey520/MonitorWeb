@@ -95,7 +95,22 @@ class MonitorDataList extends Component {
               <RadioButton value="hour"> 小时 </RadioButton>
               <RadioButton value="day"> 日均 </RadioButton>
             </RadioGroup>
-            <Cascader options={city}placeholder="请选择行政区" style={{ width: 250, marginLeft: 10 }} />
+            <Cascader
+            onChange={(value, selectedOptions)=>{
+              let code;
+              if(selectedOptions.length==3){
+                code=selectedOptions[2].id;
+              }
+              this.props.dispatch({
+                type: 'monitor/querydata',
+                payload: {
+                  ...payload,
+                  regionCode: code,
+                },
+              }
+              );
+            }}
+            options={city}placeholder="请选择行政区" style={{ width: 250, marginLeft: 10 }} />
             <Select
               onChange={(value) => {
                 this.props.dispatch(routerRedux.push(

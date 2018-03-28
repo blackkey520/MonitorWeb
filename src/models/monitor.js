@@ -99,7 +99,7 @@ export default Model.extend({
         payload.GroupID=GroupID;
       });
       const results = yield call(loadCountryPointView, payload);
-      if(results){
+      if(results!=null){
         results.data.map((item,key)=>{
           const dataitem = {
             DGIMN: item.DGIMN,
@@ -129,13 +129,14 @@ export default Model.extend({
     setup({ dispatch, history }) {
       return history.listen(({ pathname, payload }) => {
         if (pathname === '/monitor/list') {
-          const { pollutantType = null, searchTime = moment().format('YYYY-MM-DD'), monitortype = 'realtime',GroupID=[] } = payload || {};
+          const { pollutantType = null,regionCode='',keyWords='',searchTime = moment().format('YYYY-MM-DD'), monitortype = 'realtime',GroupID=[] } = payload || {};
           dispatch({ type: 'querydata',
             payload: {
               pollutantType,
-              searchTime,
               monitortype,
               GroupID,
+              regionCode,
+              keyWords,
             },
           });
         }
