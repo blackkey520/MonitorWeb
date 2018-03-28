@@ -1,4 +1,5 @@
 import { post, get } from '../dvapack/request';
+import moment from 'moment';
 
 export async function fakeAccountLogin(params) {
   const body = {
@@ -23,26 +24,38 @@ export async function loadLastdata(params) {
 export async function loadMonitorDatalist(params) {
   const body = {
     DGIMN: params.DGIMN,
-    BeginTime: params.BeginTime,
-    EndTime: params.EndTime,
+     BeginTime: params.BeginTime,
+     EndTime: params.EndTime,
     pageIndex: params.pageIndex,
     pageSize: params.pageSize,
+    pointType:params.pointType,
+    New:""
   };
   if(params.PollutantCode)
   {
     body.PollutantCode=params.PollutantCode;
   }
+ 
   let url = '';
   if (params.dataType === 'realtime') {
     url = '/api/rest/RealTime/GetRealTimeData/';
   } else if (params.dataType === 'minute') {
     url = '/api/rest/Minute/GetMinuteData/';
-  } else if (params.dataType === 'hour') {
+  } else if (params.dataType === 'hour' && params.pointType!="country") {
     url = '/api/rest/Hour/GetHourSinglePollutantData/';
-  } else if (params.dataType === 'day') {
+  } else if (params.dataType === 'day' && params.pointType!="country") {
     url = '/api/rest/Day/GetDaySinglePollutantData/';
   }
+  else if (params.dataType === 'hour' && params.pointType=="country") {
+    url = '/api/rest/ControlData/GetZQHourData';
+  }
+  else if (params.dataType === 'day' && params.pointType=="country") {
+    url = '/api/rest/ControlData/GetZQDayData';
+  }
+  
+
   const result = await get(url, body, null);
+
   return result;
 }
 export async function loadMonitoroverView(params) {

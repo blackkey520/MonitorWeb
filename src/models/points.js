@@ -18,7 +18,7 @@ export default Model.extend({
     size: 30,
     current: 1,
     querydate: [],
-    monitortype: 'realtime',
+    monitortype:  'realtime',
     selpollutant: null,
     dateformat: 'YYYY-MM-DD HH:mm:ss',
   },
@@ -28,23 +28,34 @@ export default Model.extend({
     }, { call, update, put }) {
       const { data } = yield call(loadPointDetail, { dgimn: payload.DGIMN, fileLength: 50000, width: 300 });
       yield update({ selpoint: data });
-      yield put({
-        type: 'querypointdata',
-        payload: { dgimn: payload.DGIMN, pollutant: data.PollutantTypeInfo[0].PolluntCode, querydate: [moment().add(-30, 'm'), moment()], monitortype: 'realtime', current: 1, dateformat: 'YYYY-MM-DD HH:mm:ss' },
-      });
+        yield put({
+          type: 'querypointdata',
+          payload: { dgimn: payload.DGIMN, 
+            pollutant: data.PollutantTypeInfo[0].PolluntCode, 
+            querydate:  payload.pointType=="monitorData"?[moment().add(-30, 'm'), moment()]:[moment().add(-24, 'h'), moment()],
+            monitortype: payload.pointType=="monitorData"?"realtime":"hour",
+            pointType:payload.pointType,
+            current: 1, 
+            dateformat: 'YYYY-MM-DD HH:mm:ss' },
+        });
     },
     * querypointdata({
       payload,
     }, { call, update, put, select }) {
-
+      
       const { size } = yield select(_ => _.points);
-      const result = yield call(loadMonitorDatalist, { PollutantCode: payload.pollutant,
+       
+      const pointType=payload.pointType;
+      const PollutantCode=payload.pollutant;
+      const result = yield call(loadMonitorDatalist, { 
+        PollutantCode: payload.pollutant,
         DGIMN: payload.dgimn,
         BeginTime: payload.querydate[0].format(payload.dateformat),
         EndTime: payload.querydate[1].format(payload.dateformat),
         pageIndex: payload.current,
         pageSize: size,
         dataType: payload.monitortype,
+        pointType:payload.pointType,
       });
       let resultdata = [];
       const resultda = [];
@@ -58,20 +69,37 @@ export default Model.extend({
           {
             item.MonitorValue = item.AvgValue;
             resultda.push(item);
-          } else if (payload.monitortype === 'hour')
+          } else if (payload.monitortype === 'hour' && pointType!="country")
           {
             item.MonitorValue = item.AvgValue;
             item.MonitorTime = moment(item.MonitorTime).format('YYYY-MM-DD HH');
             resultda.push(item);
           }
-          else if (payload.monitortype === 'day')
+          else if (payload.monitortype === 'day' && pointType!="country")
           {
             item.MonitorValue = item.AvgValue;
             item.MonitorTime = moment(item.MonitorTime).format('YYYY-MM-DD');
             resultda.push(item);
           }
+          else if(payload.monitortype === 'hour' && pointType=="country")
+          {
+             item.MonitorValue = item[PollutantCode];
+             item.MonitorTime = moment(item.MonitorTime).format('YYYY-MM-DD HH');
+             resultda.push(item);
+          }
+          else if(payload.monitortype === 'day' && pointType=="country")
+          {
+            item.MonitorValue = item[PollutantCode];
+            item.MonitorTime = moment(item.MonitorTime).format('YYYY-MM-DD');
+            resultda.push(item); 
+          }
+
         });
+        
       }
+
+
+      
 
       if (payload.current != 1) {
         const { data } = yield select(_ => _.points);

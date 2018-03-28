@@ -81,7 +81,8 @@ export default Model.extend({
           DGIMN: item.DGIMN,
           status: item.status,
           point: `${item.pname}-${item.text}`,
-          datetime: item.Times
+          datetime: item.Times,
+          pointType:"monitorData"
         };
         columns.map((columnsitem, columnskey) => {
           if (columnskey > 2) {

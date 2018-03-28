@@ -8,6 +8,7 @@ import city from '../../utils/city';
 import styles from './index.less';
 import BreadcrumbHeader from '../../components/BreadcrumbHeader';
 import MonitorDetail from '../../components/MonitorDetail';
+import CountryDetail from '../../components/CountryDetail';
 import { getRoutes } from '../../utils/utils';
 
 const RadioButton = Radio.Button;
@@ -30,6 +31,7 @@ class MonitorDataList extends Component {
     this.menus = props.menuData;
     this.state = {
       showdetail:false,
+      countryshowdetail:false
     };
   }
   render() {
@@ -39,6 +41,7 @@ class MonitorDataList extends Component {
     const { payload = {}, pathname } = location;
     const listProps = {
       dataSource: data,
+      className:styles.globaltable,
       columns,
       loading: effects['monitor/querydata'],
       pagination: false,
@@ -49,7 +52,7 @@ class MonitorDataList extends Component {
       bordered: true,
     };
     const routes = getRoutes(match.path, routerData);
-    debugger;
+    
     return (
       <div
         style={{ width: '100%',
@@ -126,15 +129,32 @@ class MonitorDataList extends Component {
         >
           <Table
             {...listProps}
+            bodyStyle={{ height: 'calc(100vh - 300px)' }}
             onRow={record => ({
               onClick: () => {
-                this.setState({
-                  showdetail:true
-                });
+                 
+                if(record.pointType=="monitorData")
+                {
+                  this.setState({
+                    showdetail:true,
+                    countryshowdetail:false
+                  });
+                }
+                else
+                {
+                  this.setState({
+                    showdetail:false,
+                    countryshowdetail:true
+                  });
+                }
+                console.log(record);
                 this.props.dispatch({
                   type: 'points/querypointdetail',
                   payload: record,
                 });
+
+
+             
               },
             })}
           />
@@ -156,6 +176,24 @@ class MonitorDataList extends Component {
           {effects['points/querypointdetail']?<Spin style={{width: '100%',
         height: 'calc(100vh - 260px)',marginTop:130 }} size="large" />:<MonitorDetail {...this.props} />}
         </Modal>
+
+        <Modal
+          title={this.props.selpoint !== null ? `${this.props.selpoint.Point.TargetName}-${this.props.selpoint.Point.PointName}` : '详细信息'}
+          visible={this.state.countryshowdetail}
+          width={SCREEN_WIDTH - 40}
+          style={{ top: 20 }}
+          bodyStyle={{ padding: 5 }}
+          onCancel={() => {
+            this.setState({
+              countryshowdetail:false
+            });
+          }}
+          footer={null}
+        >
+          {effects['points/querypointdetail']?<Spin style={{width: '100%',
+        height: 'calc(100vh - 260px)',marginTop:130 }} size="large" />:<CountryDetail {...this.props} pointType={"country"} />}
+        </Modal>
+
 
       </div>
     );
