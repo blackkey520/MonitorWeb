@@ -110,3 +110,13 @@ export async function loadCountryPointView(params) {
   const result = await get(url, body, null);
   return result;
 }
+
+
+export async function getAllPointAlarmInfo(params) {
+  const body = {
+    time: params.time,
+  };
+  const result = await get('/api/rest/AlarmDealInfoApi/GetAllPointExceptionInfo', body, null);
+  
+  return result === null ? { data: null } : result;
+}

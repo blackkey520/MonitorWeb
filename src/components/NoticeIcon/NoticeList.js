@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import styles from './NoticeList.less';
 
 export default function NoticeList({
-  data = [], onClick, onClear, title, locale, emptyText, emptyImage,
+  data = [], onClick, onClear, title, locale, emptyText, emptyImage, isshowclear
 }) {
   if (data.length === 0) {
     return (
@@ -47,9 +47,11 @@ export default function NoticeList({
           );
         })}
       </List>
-      <div className={styles.clear} onClick={onClear}>
+      {
+        isshowclear?<div className={styles.clear} onClick={onClear}>
         {locale.clear}{title}
-      </div>
+      </div>:null
+      }
     </div>
   );
 }

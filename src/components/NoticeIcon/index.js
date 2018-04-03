@@ -52,6 +52,7 @@ export default class NoticeIcon extends PureComponent {
             onClear={() => this.props.onClear(child.props.title)}
             title={child.props.title}
             locale={locale}
+            isshowclear={child.props.isshowclear}
           />
         </TabPane>
       );

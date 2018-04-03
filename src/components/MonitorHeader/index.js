@@ -3,7 +3,7 @@ import groupBy from 'lodash/groupBy';
 import moment from 'moment';
 import { Layout, Menu, Icon, Spin, Tag, Dropdown, Avatar } from 'antd';
 import pathToRegexp from 'path-to-regexp';
-import Debounce from 'lodash-decorators/debounce';
+import Debounce, { debounce } from 'lodash-decorators/debounce';
 import { Link } from 'dva/router';
 import NoticeIcon from '../../components/NoticeIcon';
 import HeaderSearch from '../../components/HeaderSearch';
@@ -236,6 +236,16 @@ handleMenuClick = ({ key }) => {
     });
   }
 }
+handleNoticeVisibleChange = (visible) => {
+  if (visible) {
+    this.props.dispatch({
+      type: 'global/fetchNotices',
+      payload:{
+        
+      }
+    });
+  }
+}
 render() {
   const {
     currentUser, fetchingNotices,
@@ -251,7 +261,7 @@ render() {
       <Menu.Item key="logout"><Icon type="logout" />退出登录</Menu.Item>
     </Menu>
   );
-  const noticeData = this.getNoticeData();
+  const noticeData = this.getNoticeData();  
   let selectedKeys = this.getSelectedMenuKeys(pathname);
   if (!selectedKeys.length) {
     selectedKeys = [openKeys[openKeys.length - 1]];
@@ -281,32 +291,27 @@ render() {
           />
         <NoticeIcon
           className={styles.action}
-          count={23}
-          onItemClick={(item, tabProps) => {
+          count={currentUser.notifyCount}
+          onItemClick={(item, tabProps) => {           
                 console.log(item, tabProps); // eslint-disable-line
                 }}
-          onClear={this.handleNoticeClear}
+          
           onPopupVisibleChange={this.handleNoticeVisibleChange}
           loading={fetchingNotices}
           popupAlign={{ offset: [20, -16] }}
           >
           <NoticeIcon.Tab
-            list={noticeData['通知']}
-            title="通知"
+            list={noticeData['报警']}
+            title="报警"
+            isshowclear={false}
             emptyText="你已查看所有通知"
             emptyImage="https://gw.alipayobjects.com/zos/rmsportal/wAhyIChODzsoKIOBHcBk.svg"
             />
-          <NoticeIcon.Tab
-            list={noticeData['消息']}
-            title="消息"
-            emptyText="您已读完所有消息"
-            emptyImage="https://gw.alipayobjects.com/zos/rmsportal/sAuJeJzSKbUmHfBQRzmZ.svg"
-            />
-          <NoticeIcon.Tab
-            list={noticeData['待办']}
-            title="待办"
-            emptyText="你已完成所有待办"
-            emptyImage="https://gw.alipayobjects.com/zos/rmsportal/HsIsxMZiWKrNUavQUXqx.svg"
+            <NoticeIcon.Tab
+              list={noticeData['消息']}
+              title="消息"
+              emptyText="您已读完所有消息"
+              emptyImage="https://gw.alipayobjects.com/zos/rmsportal/sAuJeJzSKbUmHfBQRzmZ.svg"
             />
         </NoticeIcon>
         {currentUser.User_Name ? (

@@ -1,18 +1,22 @@
 import moment from 'moment';
+import { debug } from 'util';
 
 export function fixedZero(val) {
   return val * 1 < 10 ? `0${val}` : val;
 }
 
 export function getTimeDistance(type) {
+  moment.locale('zh-cn');
   const now = new Date();
   const oneDay = 1000 * 60 * 60 * 24;
 
+
+  var today = {};
+  var _today = moment();
+
   if (type === 'today') {
-    now.setHours(0);
-    now.setMinutes(0);
-    now.setSeconds(0);
-    return [moment(now), moment(now.getTime() + (oneDay - 1000))];
+    today.date = _today.format('YYYY-MM-DD'); /*现在的时间*/
+    return today.date;
   }
 
   if (type === 'week') {

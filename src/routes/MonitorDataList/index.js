@@ -49,7 +49,6 @@ class MonitorDataList extends Component {
       bordered: true,
     };
     const routes = getRoutes(match.path, routerData);
-    debugger;
     return (
       <div
         style={{ width: '100%',
