@@ -1,6 +1,7 @@
 import config from '../../config';
 import Cookie from 'js-cookie';
 
+//cg add 2018.4.1
 const ws = new WebSocket('ws://' + config.webSocketPushURL + '/');
 
 export function listen(cb) {
