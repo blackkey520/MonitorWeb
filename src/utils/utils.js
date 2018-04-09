@@ -15,7 +15,7 @@ export function getTimeDistance(type) {
   var _today = moment();
 
   if (type === 'today') {
-    today.date = _today.format('YYYY-MM-DD'); /*现在的时间*/
+    today.date = _today.format('YYYY-MM-DD HH:mm:ss'); /*现在的时间*/
     return today.date;
   }
 

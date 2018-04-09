@@ -37,7 +37,12 @@ export default Model.extend({
           id:elem.DGIMN,
           avatar:'https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png',
           title:elem.PointName+"报警"+elem.Count+"次",
+          parentname:elem.ParentName,
+          pointname:elem.PointName,
           datetime:elem.DateNow,
+          alarmTime:elem.AlarmTime,
+          DGIMN:elem.DGIMN,
+          datenow:elem.DateNow,
           type: '报警'
           });
           count+=elem.Count;

@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import groupBy from 'lodash/groupBy';
 import moment from 'moment';
-import { Layout, Menu, Icon, Spin, Tag, Dropdown, Avatar } from 'antd';
+import { Layout, Menu, Icon, Spin, Tag, Dropdown, Avatar,Modal } from 'antd';
 import pathToRegexp from 'path-to-regexp';
 import Debounce, { debounce } from 'lodash-decorators/debounce';
 import { Link } from 'dva/router';
@@ -10,7 +10,7 @@ import HeaderSearch from '../../components/HeaderSearch';
 import styles from './index.less';
 import config from '../../config';
 import logo from '../../assets/logo.svg';
-
+import MessageDetail from '../../components/MessageDetail'
 
 const { Header } = Layout;
 const { SubMenu } = Menu;
@@ -30,6 +30,11 @@ export default class MonitorHeader extends PureComponent {
     this.menus = props.menuData;
     this.state = {
       openKeys: this.getDefaultCollapsedSubMenus(props),
+      showdetail:false,
+      detailtitle:"",
+      alarmTime:0,
+      DGIMN:"",
+      datetime:null
     };
   }
   componentDidMount() {
@@ -252,6 +257,9 @@ render() {
     location: { pathname },
   } = this.props;
 
+  const SCREEN_HEIGHT = document.querySelector('body').offsetHeight;
+  const SCREEN_WIDTH = document.querySelector('body').offsetWidth;
+
   const { openKeys } = this.state;
   const menu = (
     <Menu className={styles.menu} selectedKeys={[]} onClick={this.handleMenuClick}>
@@ -293,9 +301,16 @@ render() {
           className={styles.action}
           count={currentUser.notifyCount}
           onItemClick={(item, tabProps) => {           
-                console.log(item, tabProps); // eslint-disable-line
-                }}
-          
+            this.setState({
+              showdetail:true,
+              detailtitle:item.parentname+"-"+item.pointname,
+              DGIMN:item.DGIMN,
+              datetime:item.datetime,
+              datenow:item.datenow
+            });
+
+            // console.log(item, tabProps); // eslint-disable-line
+          }}          
           onPopupVisibleChange={this.handleNoticeVisibleChange}
           loading={fetchingNotices}
           popupAlign={{ offset: [20, -16] }}
@@ -331,6 +346,21 @@ render() {
         >
         {this.getNavMenuItems(this.menus)}
       </Menu>
+      <Modal
+      title={this.state.detailtitle !== null ? `${this.state.detailtitle }` : '详细信息'}
+      visible={this.state.showdetail}
+      //wrapClassName={styles["vertical-center-modal"]}
+      width={SCREEN_WIDTH*0.45}     
+      onCancel={() => {
+        this.setState({
+          showdetail:false
+        });
+      }}
+      footer={null}
+    >
+      <MessageDetail changeModel={this.changeModelheight} {...this.props} {...this.state}/>
+    </Modal>
+
     </Header>
   );
 }

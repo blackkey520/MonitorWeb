@@ -121,3 +121,15 @@ export async function getAllPointAlarmInfo(params) {
   
   return result === null ? { data: null } : result;
 }
+
+export async function getAllExceptionInfo(params) {
+  const body = {
+    dgimn: params.dgimn,
+    starttime:params.starttime,
+    endtime:params.endtime,
+    pageindex:params.pageindex,
+    pagesize:params.pagesize,
+  };
+  const result = await get('/api/rest/AlarmDealInfoApi/GetAllExceptionInfo', body, null);  
+  return result === null ? { data: null } : result;
+}
