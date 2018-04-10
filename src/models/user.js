@@ -37,6 +37,18 @@ export default {
         });
       }
     },
+    *changepwd(_, { put }) {
+      const response = Cookie.get('token');
+      if (response) {
+        const user = JSON.parse(response);
+
+        yield put({
+          type: 'saveCurrentUser',
+          payload: user,
+        });
+      }
+    },
+    
   },
 
   reducers: {

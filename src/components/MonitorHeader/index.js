@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import groupBy from 'lodash/groupBy';
 import moment from 'moment';
-import { Layout, Menu, Icon, Spin, Tag, Dropdown, Avatar,Modal } from 'antd';
+import { Layout, Menu, Icon, Spin, Tag, Dropdown, Avatar,Modal,Form, Input,Tooltip, Cascader, Select, Row, Col, Checkbox, Button, AutoComplete  } from 'antd';
 import pathToRegexp from 'path-to-regexp';
 import Debounce, { debounce } from 'lodash-decorators/debounce';
 import { Link } from 'dva/router';
@@ -11,6 +11,10 @@ import styles from './index.less';
 import config from '../../config';
 import logo from '../../assets/logo.svg';
 import MessageDetail from '../../components/MessageDetail'
+
+
+
+const FormItem = Form.Item;
 
 const { Header } = Layout;
 const { SubMenu } = Menu;
@@ -34,7 +38,8 @@ export default class MonitorHeader extends PureComponent {
       detailtitle:"",
       alarmTime:0,
       DGIMN:"",
-      datetime:null
+      datetime:null,
+      showchangepwd:false
     };
   }
   componentDidMount() {
@@ -234,12 +239,24 @@ export default class MonitorHeader extends PureComponent {
     });
   }
 handleMenuClick = ({ key }) => {
-
-  if (key === 'logout') {
-    this.props.dispatch({
-      type: 'login/logout',
-    });
+  switch (key) {
+    case 'logout':
+      this.props.dispatch({
+        type: 'login/logout',
+      });
+      break;
+    case 'changepwd':
+      let showchangepwd={showchangepwd:true};
+      this.setState(showchangepwd);
+     /*  this.props.dispatch({
+        type: 'user/changepwd',
+        payload: {},
+      }); */
+      break;
+    default:
+      break;
   }
+  
 }
 handleNoticeVisibleChange = (visible) => {
   if (visible) {
@@ -257,6 +274,18 @@ render() {
     location: { pathname },
   } = this.props;
 
+  const formItemLayout = {
+    labelCol: {
+      xs: { span: 24 },
+      sm: { span: 8 },
+    },
+    wrapperCol: {
+      xs: { span: 24 },
+      sm: { span: 16 },
+    },
+  };
+  /* const { getFieldDecorator } = this.props.form; */
+
   const SCREEN_HEIGHT = document.querySelector('body').offsetHeight;
   const SCREEN_WIDTH = document.querySelector('body').offsetWidth;
 
@@ -264,7 +293,7 @@ render() {
   const menu = (
     <Menu className={styles.menu} selectedKeys={[]} onClick={this.handleMenuClick}>
       <Menu.Item disabled><Icon type="user" />个人中心</Menu.Item>
-      <Menu.Item disabled><Icon type="setting" />设置</Menu.Item>
+      <Menu.Item key="changepwd"><Icon type="edit" />修改密码</Menu.Item>
       <Menu.Divider />
       <Menu.Item key="logout"><Icon type="logout" />退出登录</Menu.Item>
     </Menu>
@@ -346,6 +375,8 @@ render() {
         >
         {this.getNavMenuItems(this.menus)}
       </Menu>
+
+      
       <Modal
       title={this.state.detailtitle !== null ? `${this.state.detailtitle }` : '详细信息'}
       visible={this.state.showdetail}
@@ -360,6 +391,53 @@ render() {
     >
       <MessageDetail changeModel={this.changeModelheight} {...this.props} {...this.state}/>
     </Modal>
+
+
+    
+    <Modal
+    title='修改密码'
+    visible={this.state.showchangepwd}
+    width={SCREEN_WIDTH*0.45}
+    wrapClassName="vertical-center-modal"  
+    onCancel={() => {
+      this.setState({
+        showchangepwd:false
+      });
+    }}
+  >
+  {
+       /*  <Form onSubmit={this.handleSubmit}>
+          <FormItem
+            {...formItemLayout}
+            label="Password"
+          >
+            {getFieldDecorator('password', {
+              rules: [{
+                required: true, message: 'Please input your password!',
+              }, {
+                validator: this.validateToNextPassword,
+              }],
+            })(
+              <Input type="password" />
+            )}
+          </FormItem>
+          <FormItem
+            {...formItemLayout}
+            label="Confirm Password"
+          >
+            {getFieldDecorator('confirm', {
+              rules: [{
+                required: true, message: 'Please confirm your password!',
+              }, {
+                validator: this.compareToFirstPassword,
+              }],
+            })(
+              <Input type="password" onBlur={this.handleConfirmBlur} />
+            )}
+          </FormItem>
+        </Form>   */
+          }
+  </Modal>
 
     </Header>
   );
