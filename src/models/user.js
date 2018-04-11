@@ -1,5 +1,5 @@
 import Cookie from 'js-cookie';
-import { query as queryUsers, queryCurrent } from '../services/user';
+import { query as queryUsers, queryCurrent, changepwd } from '../services/user';
 
 export default {
   namespace: 'user',
@@ -8,6 +8,7 @@ export default {
     list: [],
     loading: false,
     currentUser: {},
+    changepwdRes:"",
   },
 
   effects: {
@@ -37,16 +38,24 @@ export default {
         });
       }
     },
-    *changepwd(_, { put }) {
+    *changepwd({ payload }, { call, put }) {
+      yield put({
+        type: 'changeLoading',
+        payload: true,
+      });
       const response = Cookie.get('token');
       if (response) {
         const user = JSON.parse(response);
-
+        const res = yield call(changepwd, payload);
         yield put({
-          type: 'saveCurrentUser',
-          payload: user,
+          type: 'saveChangePwdRes',
+          payload: res.data,
         });
       }
+      yield put({
+        type: 'changeLoading',
+        payload: false,
+      });
     },
     
   },
@@ -79,5 +88,12 @@ export default {
         },
       };
     },
+    saveChangePwdRes(state, action) {
+      return {
+        ...state,
+        changepwdRes: action.payload,
+      };
+    },
+
   },
 };

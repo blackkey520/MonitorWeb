@@ -11,10 +11,8 @@ import styles from './index.less';
 import config from '../../config';
 import logo from '../../assets/logo.svg';
 import MessageDetail from '../../components/MessageDetail'
+import ChangePwdDetail from '../ChangePwdDetail';
 
-
-
-const FormItem = Form.Item;
 
 const { Header } = Layout;
 const { SubMenu } = Menu;
@@ -39,7 +37,6 @@ export default class MonitorHeader extends PureComponent {
       alarmTime:0,
       DGIMN:"",
       datetime:null,
-      showchangepwd:false
     };
   }
   componentDidMount() {
@@ -246,17 +243,14 @@ handleMenuClick = ({ key }) => {
       });
       break;
     case 'changepwd':
-      let showchangepwd={showchangepwd:true};
-      this.setState(showchangepwd);
-     /*  this.props.dispatch({
-        type: 'user/changepwd',
-        payload: {},
-      }); */
+      this.child.modifyshowchangepwd();
       break;
     default:
       break;
-  }
-  
+  }  
+}
+onRef = (ref) => {
+  this.child = ref
 }
 handleNoticeVisibleChange = (visible) => {
   if (visible) {
@@ -274,17 +268,6 @@ render() {
     location: { pathname },
   } = this.props;
 
-  const formItemLayout = {
-    labelCol: {
-      xs: { span: 24 },
-      sm: { span: 8 },
-    },
-    wrapperCol: {
-      xs: { span: 24 },
-      sm: { span: 16 },
-    },
-  };
-  /* const { getFieldDecorator } = this.props.form; */
 
   const SCREEN_HEIGHT = document.querySelector('body').offsetHeight;
   const SCREEN_WIDTH = document.querySelector('body').offsetWidth;
@@ -393,52 +376,8 @@ render() {
     </Modal>
 
 
+    <ChangePwdDetail {...this.props} onRef={this.onRef} />
     
-    <Modal
-    title='修改密码'
-    visible={this.state.showchangepwd}
-    width={SCREEN_WIDTH*0.45}
-    wrapClassName="vertical-center-modal"  
-    onCancel={() => {
-      this.setState({
-        showchangepwd:false
-      });
-    }}
-  >
-  {
-       /*  <Form onSubmit={this.handleSubmit}>
-          <FormItem
-            {...formItemLayout}
-            label="Password"
-          >
-            {getFieldDecorator('password', {
-              rules: [{
-                required: true, message: 'Please input your password!',
-              }, {
-                validator: this.validateToNextPassword,
-              }],
-            })(
-              <Input type="password" />
-            )}
-          </FormItem>
-          <FormItem
-            {...formItemLayout}
-            label="Confirm Password"
-          >
-            {getFieldDecorator('confirm', {
-              rules: [{
-                required: true, message: 'Please confirm your password!',
-              }, {
-                validator: this.compareToFirstPassword,
-              }],
-            })(
-              <Input type="password" onBlur={this.handleConfirmBlur} />
-            )}
-          </FormItem>
-        </Form>   */
-          }
-  </Modal>
-
     </Header>
   );
 }
