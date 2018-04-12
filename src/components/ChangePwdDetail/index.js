@@ -2,7 +2,7 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import moment from 'moment';
-import { Form, Input, Tooltip, message,Modal  } from 'antd';
+import { Form, Input, Tooltip, message,Modal,Spin  } from 'antd';
 import { routerRedux } from 'dva/router';
 import reqwest from 'reqwest';
 import { post,get,geturl } from '../../dvapack/request';
@@ -19,8 +19,8 @@ if (response) {
     user = JSON.parse(response);
 }
 
-@connect(({user}) => ({
-  changepwdRes: user.changepwdRes,
+@connect(({user,loading}) => ({
+  isload:loading.effects['user/changepwd'],
 }))
 @Form.create()
 class ChangePwdDetail extends PureComponent {  
@@ -39,7 +39,6 @@ class ChangePwdDetail extends PureComponent {
     this.setState(showchangepwd);
   }
   sleep = (numberMillis) => {
-    debugger;
     var now = new Date();
     var exitTime = now.getTime() + numberMillis;
     while (true) {
@@ -52,17 +51,7 @@ class ChangePwdDetail extends PureComponent {
     e.preventDefault();
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        let ss = this.changepwd();
-        if (ss == 1) {
-          message.info('密码修改成功,请重新登录！');
-          this.props.dispatch({
-            type: 'login/logout',
-          });
-        }else if (ss == 0) {
-          message.info('旧密码输入错误！');
-        } else {
-          message.info('密码修改失败,请稍后重试！');
-        }
+        this.changepwd();
       }
     });
   }
@@ -75,16 +64,8 @@ class ChangePwdDetail extends PureComponent {
     this.props.dispatch({
       type: 'user/changepwd',
       payload: {oldpassword,password,confirm},
-    });
-    const changepwdResStr = this.props.changepwdRes;
-    console.log("changepwdResStr"+changepwdResStr);
-    if(changepwdResStr.includes('成功'))
-    {
-      return 1;
-    }
-    else if(changepwdResStr.includes('原始密码')||changepwdResStr.includes('旧密码')||changepwdResStr.includes('老密码')){
-      return 0;
-    }
+    }); 
+      
   }
   handleConfirmBlur = (e) => {
     const value = e.target.value;
@@ -143,12 +124,13 @@ class ChangePwdDetail extends PureComponent {
         }}
         onOk={this.handleSubmit}
       >
+      <Spin spinning={this.props.isload}>
       <Form onSubmit={this.handleSubmit}>
         <FormItem
           {...formItemLayout}
           label="账户"
         >
-          <label value={`${user.User_Name}(${user.User_Account})`}>{`${user.User_Name}(${user.User_Account})`}</label>
+              <label value={user == null ? '' : `${user.User_Name}(${user.User_Account})`}>{user == null ? '' : `${user.User_Name}(${user.User_Account})`}</label>
         </FormItem>
         <FormItem
           {...formItemLayout}
@@ -193,7 +175,7 @@ class ChangePwdDetail extends PureComponent {
           )}
         </FormItem>
       </Form>
-      
+      </Spin>
       </Modal>
     );
   }

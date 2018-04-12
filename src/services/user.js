@@ -15,7 +15,6 @@ export async function changepwd(params) {
     UserPwdNew: params.password,
     UserPwdTwo: params.confirm,
   };
-  debugger;
   const result = post('/api/rest/Author/ResetPwd', body, null);
   return result === null ? { data: null } : result;
 }

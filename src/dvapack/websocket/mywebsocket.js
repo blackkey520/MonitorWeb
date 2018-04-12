@@ -10,7 +10,8 @@ export function listen(cb) {
     const response = Cookie.get('token');
     if (response) {        
         const user = JSON.parse(response);
-        ws.send(user.User_Account);
+        if(user)
+          ws.send(user.User_Account);          
     }else{
         ws.send("system");
     }
@@ -31,7 +32,8 @@ export function listen(cb) {
         const response = Cookie.get('token');
         if (response) {        
             const user = JSON.parse(response);
-            ws.send(user.User_Account);
+            if(user)
+              ws.send(user.User_Account);
         }else{
             ws.send("system");
         }
