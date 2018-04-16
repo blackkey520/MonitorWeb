@@ -32,21 +32,23 @@ export default Model.extend({
        let data=[];
        let count=0;
        if(res){
-        res.data.map(elem=>{
-          data.push({
-          id:elem.DGIMN,
-          avatar:'https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png',
-          title:elem.PointName+"报警"+elem.Count+"次",
-          parentname:elem.ParentName,
-          pointname:elem.PointName,
-          datetime:elem.DateNow,
-          alarmTime:elem.AlarmTime,
-          DGIMN:elem.DGIMN,
-          datenow:elem.DateNow,
-          type: '报警'
-          });
-          count+=elem.Count;
-        });
+         if (res.data) {           
+            res.data.map(elem=>{
+              data.push({
+              id:elem.DGIMN,
+              avatar:'https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png',
+              title:elem.PointName+"报警"+elem.Count+"次",
+              parentname:elem.ParentName,
+              pointname:elem.PointName,
+              datetime:elem.DateNow,
+              alarmTime:elem.AlarmTime,
+              DGIMN:elem.DGIMN,
+              datenow:elem.DateNow,
+              type: '报警'
+              });
+              count+=elem.Count;
+            });
+         }
       }
 
       yield put({
@@ -72,9 +74,9 @@ export default Model.extend({
     *saveFeed({payload}, {put, call, select}) {
       const {data} = payload;
       // console.log('data152:' + JSON.stringify(data))
-      yield put({type: 'fetchNotices', payload: {
-          data
-      }});
+      // yield put({type: 'fetchNotices', payload: {
+      //     data
+      // }});
     }
   },
 
@@ -107,13 +109,13 @@ export default Model.extend({
   },
 
   subscriptions: {
-    feedSubscriber({dispatch}) {
-      return service.listen((data) => {
-        dispatch({type: 'saveFeed', payload: {
-            data
-          }});
-      });
-    },
+    // feedSubscriber({dispatch}) {
+    //   return service.listen((data) => {
+    //     dispatch({type: 'saveFeed', payload: {
+    //         data
+    //       }});
+    //   });
+    // },
   //   socket({dispatch}){ // socket相关
   //     debugger;
   //     return service.listen(data => {
