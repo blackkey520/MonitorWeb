@@ -169,7 +169,6 @@ export default Model.extend({
               }
           
           })
-          console.log(chartdata)
           yield update({ columns });
           yield update({ Tablewidth });
           yield update({ countryid });
@@ -177,41 +176,77 @@ export default Model.extend({
          }
          else
          {
-           debugger;
+          
           let dgimn='';
           let existdata ='';
           let exist='';
-          payload.countrydgimn.map((item,key)=>{
-           existdata =countryid.indexOf(item.key);
-           if(existdata=="-1")
-           {
-             exist=item;
-             dgimn=exist.key;
-           }
-         })
-          if(existdata=="-1")
+          if(payload.countrydgimn.length<countryArray.length)
           {
-             countryArray.push(exist);
-             countryid.push(exist.key)
-             columns.push({
-               title: exist.label,
-               dataIndex: exist.key,
-               key: exist.key,
-              })
-          }
-          else
-          {
-             columns.splice(existdata+1,1)
-             countryArray.splice(existdata-1,1);
-             countryid.splice(existdata-1,1);
-          }
+            countryid=[];
+            countryArray=[];
+            columns= [{
+             title: '监控时间',
+             dataIndex: 'MonitorTime',
+             key: 'MonitorTime',
+             width:180,
+             fixed: 'left',
+             align:'center'
+           }, {
+             title: '浓度',
+             dataIndex: 'MonitorValue',
+             key: 'MonitorValue',
+             width:100,
             
+             render: (text, record) => (
+               <div style={{ color: record.color} }>{text}</div>
+             ),
+           }];
+           payload.countrydgimn.map((item,key)=>{
+            countryArray.push(item);
+            countryid.push(item.key)
+            columns.push({
+              title: item.label,
+              dataIndex: item.key,
+              key: item.key,
+             })
+           })
+          }
+          else{
+            payload.countrydgimn.map((item,key)=>{
+              existdata=countryid.indexOf(item.key);
+              if(existdata=="-1")
+              {
+                exist=item;
+                dgimn=exist.key;
+              }
+            })
+             if(existdata=="-1")
+             {
+                countryArray.push(exist);
+                countryid.push(exist.key)
+                columns.push({
+                  title: exist.label,
+                  dataIndex: exist.key,
+                  key: exist.key,
+                 })
+             }
+             else
+             {
+                columns.splice(existdata+1,1)
+                countryArray.splice(existdata-1,1);
+                countryid.splice(existdata-1,1);
+             }
+          }
+         
+          
           Tablewidth=280+countryid.length*100;
-          yield update({ columns });
-          yield update({ Tablewidth });
-          yield update({ countryid });
+          yield update({ countryid ,countryArray,Tablewidth,columns});
           if(!dgimn)
-          return;
+          {
+            yield update({ isfinished:false });
+            return;
+          }
+        
           const result = yield call(loadMonitorDatalist, { 
            PollutantCode: payload.pollutant,
            DGIMN: dgimn,

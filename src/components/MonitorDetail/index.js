@@ -36,7 +36,8 @@ class MonitorDetail extends PureComponent {
       pollutant: props.selpoint.PollutantTypeInfo[0].PolluntCode,
       countryPointInfo:[],
       countrydgimn:'',
-      PointName: props.selpoint.Point.PointName
+      PointName: props.selpoint.Point.PointName,
+      countrylength:0
     };
      
   }
@@ -116,32 +117,32 @@ class MonitorDetail extends PureComponent {
     if(!this.props.isfinished)
     {
       if(value.length>5)
-    {
-      return  message.info('最多只能选择5个点对比');
+      {
+        return  message.info('最多只能选择5个点对比');
+      }
+      this.setState({
+        countryPointInfo: value,
+        countrydgimn:value
+      });
+      this.props.dispatch({
+        type: 'points/querychartpointdata',
+        payload: {
+          ...this.state,
+          dgimn: this.props.selpoint.Point.Dgimn,
+          current: 1,
+          countrydgimn:value,
+        },
+      });
     }
-    
-    this.setState({
-      countryPointInfo: value,
-      countrydgimn:value
-    });
-    this.props.dispatch({
-      type: 'points/querychartpointdata',
-      payload: {
-         ...this.state,
-         dgimn: this.props.selpoint.Point.Dgimn,
-         current: 1,
-         countrydgimn:value,
-      },
-    });
-    }else{
+    else{
       return  message.info('您操作的太快了');
     }
-    
+    this.setState({
+      countrylength:value.length
+    })
   }
   render() {
     const { selpoint, effects ,countryPointInfo} = this.props;
-    debugger;
-    console.log(this.props.isfinished);
     return (
       <div
         style={{ width: '100%',
