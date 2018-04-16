@@ -181,3 +181,25 @@ export async function loadCountryPointView(params) {
   const result = await get(url, body, null);
   return result;
 }
+
+
+export async function getAllPointAlarmInfo(params) {
+  const body = {
+    time: params.time,
+  };
+  const result = await get('/api/rest/AlarmDealInfoApi/GetAllPointExceptionInfo', body, null);
+  
+  return result === null ? { data: null } : result;
+}
+
+export async function getAllExceptionInfo(params) {
+  const body = {
+    dgimn: params.dgimn,
+    starttime:params.starttime,
+    endtime:params.endtime,
+    pageindex:params.pageindex,
+    pagesize:params.pagesize,
+  };
+  const result = await get('/api/rest/AlarmDealInfoApi/GetAllExceptionInfo', body, null);  
+  return result === null ? { data: null } : result;
+}

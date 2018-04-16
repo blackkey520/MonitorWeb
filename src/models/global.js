@@ -1,7 +1,9 @@
-import { queryNotices } from '../services/mockservice';
+// import { queryNotices } from '../services/mockservice';
 import { Model } from '../dvapack';
-import { loadPollutantType } from '../services/api';
-
+import { getTimeDistance } from '../utils/utils';
+import { loadPollutantType,getAllPointAlarmInfo } from '../services/api';
+import * as service from '../dvapack/websocket/mywebsocket';
+import { debug } from 'util';
 
 export default Model.extend({
   namespace: 'global',
@@ -17,19 +19,43 @@ export default Model.extend({
       const pollutanttype = pollutanttyperesult.data;
       yield update({ pollutanttype });
     },
-    *fetchNotices(_, { call, put }) {
+    *fetchNotices({payload}, { call, put }) {
       yield put({
         type: 'changeNoticeLoading',
         payload: true,
       });
-      const data = yield call(queryNotices);
+      let today = getTimeDistance("today");
+
+      payload.time=today;
+      const res = yield call(getAllPointAlarmInfo,payload);
+
+       let data=[];
+       let count=0;
+       if(res){
+        res.data.map(elem=>{
+          data.push({
+          id:elem.DGIMN,
+          avatar:'https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png',
+          title:elem.PointName+"报警"+elem.Count+"次",
+          parentname:elem.ParentName,
+          pointname:elem.PointName,
+          datetime:elem.DateNow,
+          alarmTime:elem.AlarmTime,
+          DGIMN:elem.DGIMN,
+          datenow:elem.DateNow,
+          type: '报警'
+          });
+          count+=elem.Count;
+        });
+      }
+
       yield put({
         type: 'saveNotices',
         payload: data,
       });
       yield put({
         type: 'user/changeNotifyCount',
-        payload: data.length,
+        payload: count,
       });
     },
     *clearNotices({ payload }, { put, select }) {
@@ -43,6 +69,13 @@ export default Model.extend({
         payload: count,
       });
     },
+    *saveFeed({payload}, {put, call, select}) {
+      const {data} = payload;
+      // console.log('data152:' + JSON.stringify(data))
+      yield put({type: 'fetchNotices', payload: {
+          data
+      }});
+    }
   },
 
   reducers: {
@@ -74,7 +107,37 @@ export default Model.extend({
   },
 
   subscriptions: {
-    setup({ dispatch, history }) {
+    feedSubscriber({dispatch}) {
+      return service.listen((data) => {
+        dispatch({type: 'saveFeed', payload: {
+            data
+          }});
+      });
+    },
+  //   socket({dispatch}){ // socket相关
+  //     debugger;
+  //     return service.listen(data => {
+  //         switch (data.type) {
+  //             case 'connect':
+  //                 if (data.state === 'success') {
+  //                     dispatch({
+  //                         type: 'connectSuccess'
+  //                     })
+  //                 } else {
+  //                     dispatch({
+  //                         type: 'connectFail'
+  //                     })
+  //                 }
+  //                 break;
+  //             case 'welcome':
+  //                 dispatch({
+  //                     type: 'welcome'
+  //                 });
+  //                 break;
+  //         }
+  //     })
+  // },
+  setup({ dispatch, history }) {
       // Subscribe history(url) change, trigger `load` action if pathname is `/`
       return history.listen(({ pathname, search }) => {
         if (typeof window.ga !== 'undefined') {

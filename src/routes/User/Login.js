@@ -20,7 +20,7 @@ export default class Login extends Component {
   componentWillUnmount() {
     clearInterval(this.interval);
   }
-
+  
   onSwitch = (type) => {
     this.setState({ type });
   }

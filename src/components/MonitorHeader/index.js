@@ -1,15 +1,17 @@
 import React, { PureComponent } from 'react';
 import groupBy from 'lodash/groupBy';
 import moment from 'moment';
-import { Layout, Menu, Icon, Spin, Tag, Dropdown, Avatar } from 'antd';
+import { Layout, Menu, Icon, Spin, Tag, Dropdown, Avatar,Modal,Form, Input,Tooltip, Cascader, Select, Row, Col, Checkbox, Button, AutoComplete  } from 'antd';
 import pathToRegexp from 'path-to-regexp';
-import Debounce from 'lodash-decorators/debounce';
+import Debounce, { debounce } from 'lodash-decorators/debounce';
 import { Link } from 'dva/router';
 import NoticeIcon from '../../components/NoticeIcon';
 import HeaderSearch from '../../components/HeaderSearch';
 import styles from './index.less';
 import config from '../../config';
 import logo from '../../assets/logo.svg';
+import MessageDetail from '../../components/MessageDetail'
+import ChangePwdDetail from '../ChangePwdDetail';
 
 
 const { Header } = Layout;
@@ -30,6 +32,11 @@ export default class MonitorHeader extends PureComponent {
     this.menus = props.menuData;
     this.state = {
       openKeys: this.getDefaultCollapsedSubMenus(props),
+      showdetail:false,
+      detailtitle:"",
+      alarmTime:0,
+      DGIMN:"",
+      datetime:null,
     };
   }
   componentDidMount() {
@@ -229,10 +236,29 @@ export default class MonitorHeader extends PureComponent {
     });
   }
 handleMenuClick = ({ key }) => {
-
-  if (key === 'logout') {
+  switch (key) {
+    case 'logout':
+      this.props.dispatch({
+        type: 'login/logout',
+      });
+      break;
+    case 'changepwd':
+      this.child.modifyshowchangepwd();
+      break;
+    default:
+      break;
+  }  
+}
+onRef = (ref) => {
+  this.child = ref
+}
+handleNoticeVisibleChange = (visible) => {
+  if (visible) {
     this.props.dispatch({
-      type: 'login/logout',
+      type: 'global/fetchNotices',
+      payload:{
+        
+      }
     });
   }
 }
@@ -242,16 +268,20 @@ render() {
     location: { pathname },
   } = this.props;
 
+
+  const SCREEN_HEIGHT = document.querySelector('body').offsetHeight;
+  const SCREEN_WIDTH = document.querySelector('body').offsetWidth;
+
   const { openKeys } = this.state;
   const menu = (
     <Menu className={styles.menu} selectedKeys={[]} onClick={this.handleMenuClick}>
       <Menu.Item disabled><Icon type="user" />个人中心</Menu.Item>
-      <Menu.Item disabled><Icon type="setting" />设置</Menu.Item>
+      <Menu.Item key="changepwd"><Icon type="edit" />修改密码</Menu.Item>
       <Menu.Divider />
       <Menu.Item key="logout"><Icon type="logout" />退出登录</Menu.Item>
     </Menu>
   );
-  const noticeData = this.getNoticeData();
+  const noticeData = this.getNoticeData();  
   let selectedKeys = this.getSelectedMenuKeys(pathname);
   if (!selectedKeys.length) {
     selectedKeys = [openKeys[openKeys.length - 1]];
@@ -281,32 +311,34 @@ render() {
           />
         <NoticeIcon
           className={styles.action}
-          count={23}
-          onItemClick={(item, tabProps) => {
-                console.log(item, tabProps); // eslint-disable-line
-                }}
-          onClear={this.handleNoticeClear}
+          count={currentUser.notifyCount}
+          onItemClick={(item, tabProps) => {           
+            this.setState({
+              showdetail:true,
+              detailtitle:item.parentname+"-"+item.pointname,
+              DGIMN:item.DGIMN,
+              datetime:item.datetime,
+              datenow:item.datenow
+            });
+
+            // console.log(item, tabProps); // eslint-disable-line
+          }}          
           onPopupVisibleChange={this.handleNoticeVisibleChange}
           loading={fetchingNotices}
           popupAlign={{ offset: [20, -16] }}
           >
           <NoticeIcon.Tab
-            list={noticeData['通知']}
-            title="通知"
+            list={noticeData['报警']}
+            title="报警"
+            isshowclear={false}
             emptyText="你已查看所有通知"
             emptyImage="https://gw.alipayobjects.com/zos/rmsportal/wAhyIChODzsoKIOBHcBk.svg"
             />
-          <NoticeIcon.Tab
-            list={noticeData['消息']}
-            title="消息"
-            emptyText="您已读完所有消息"
-            emptyImage="https://gw.alipayobjects.com/zos/rmsportal/sAuJeJzSKbUmHfBQRzmZ.svg"
-            />
-          <NoticeIcon.Tab
-            list={noticeData['待办']}
-            title="待办"
-            emptyText="你已完成所有待办"
-            emptyImage="https://gw.alipayobjects.com/zos/rmsportal/HsIsxMZiWKrNUavQUXqx.svg"
+            <NoticeIcon.Tab
+              list={noticeData['消息']}
+              title="消息"
+              emptyText="您已读完所有消息"
+              emptyImage="https://gw.alipayobjects.com/zos/rmsportal/sAuJeJzSKbUmHfBQRzmZ.svg"
             />
         </NoticeIcon>
         {currentUser.User_Name ? (
@@ -326,6 +358,26 @@ render() {
         >
         {this.getNavMenuItems(this.menus)}
       </Menu>
+
+      
+      <Modal
+      title={this.state.detailtitle !== null ? `${this.state.detailtitle }` : '详细信息'}
+      visible={this.state.showdetail}
+      //wrapClassName={styles["vertical-center-modal"]}
+      width={SCREEN_WIDTH*0.45}     
+      onCancel={() => {
+        this.setState({
+          showdetail:false
+        });
+      }}
+      footer={null}
+    >
+      <MessageDetail changeModel={this.changeModelheight} {...this.props} {...this.state}/>
+    </Modal>
+
+
+    <ChangePwdDetail {...this.props} onRef={this.onRef} />
+    
     </Header>
   );
 }

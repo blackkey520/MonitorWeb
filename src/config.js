@@ -13,4 +13,5 @@ module.exports={
   CORS: [],
   openPages: ['/login'],
   apiPrefix: '/mock',
+  webSocketPushURL:'172.16.12.152:40001'
 }

@@ -161,7 +161,8 @@ class MonitorLayout extends React.PureComponent {
                   })
                 }
                 <Redirect exact from="/" to={bashRedirect} />
-                <Route render={NotFound} />
+                <Route rendermonitor
+                ={NotFound} />
               </Switch>
             </div>
 

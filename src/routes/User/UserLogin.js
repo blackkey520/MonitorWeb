@@ -64,6 +64,13 @@ export default class Login extends Component {
       />
     );
   }
+  //临时使用，用于每次输入用户名和密码
+  componentDidMount(){
+    this.props.form.setFieldsValue({
+      User_Account: 'system',
+      User_Pwd:"system"
+    });
+  }
 
   render() {
     const { form, login } = this.props;
@@ -102,8 +109,7 @@ export default class Login extends Component {
                   <Input
                     size="large"
                     prefix={<Icon type="lock" className={styles.prefixIcon} />}
-                    type="password"
-                    placeholder="888888"
+                    placeholder="888888" type="password"
                   />
                 )}
               </FormItem>
