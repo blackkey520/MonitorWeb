@@ -133,18 +133,17 @@ export default Model.extend({
           }];
        
           let allcountrydata=[];
-          payload.countrydgimn.map(  (item,key)=>{
+          payload.countrydgimn.map((item,key)=>{
             countryArray.push(item);
             countryid.push(item.key)
             columns.push({
               title: item.label,
               dataIndex: item.key,
               key: item.key,
-             
              })
              mnlist.push(item.key);
           });
-          console.log(mnlist);
+         
           const result = yield call(maploadMonitorDatalist, { 
             PollutantCode: payload.pollutant,
             BeginTime: payload.querydate[0].format(payload.dateformat),
@@ -155,7 +154,7 @@ export default Model.extend({
             pointType:payload.pointType,
             mnlist:mnlist
           });
-          console.log(result);  
+         
           if(result!=null)
           {
             allcountrydata= allcountrydata.concat(result);
@@ -178,6 +177,7 @@ export default Model.extend({
          }
          else
          {
+           debugger;
           let dgimn='';
           let existdata ='';
           let exist='';
@@ -201,9 +201,9 @@ export default Model.extend({
           }
           else
           {
-             countryArray.splice(existdata,1);
-             countryid.splice(existdata,1);
-             columns.splice(existdata+2,1)
+             columns.splice(existdata+1,1)
+             countryArray.splice(existdata-1,1);
+             countryid.splice(existdata-1,1);
           }
             
           Tablewidth=280+countryid.length*100;
