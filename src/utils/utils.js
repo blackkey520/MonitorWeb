@@ -3,6 +3,7 @@ import moment from 'moment';
 export function fixedZero(val) {
   return val * 1 < 10 ? `0${val}` : val;
 }
+export const delay = time => new Promise(resolve => setTimeout(resolve, time));
 
 export function getTimeDistance(type) {
   const now = new Date();

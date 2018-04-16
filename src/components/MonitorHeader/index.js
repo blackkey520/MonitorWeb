@@ -271,7 +271,7 @@ render() {
         <HeaderSearch
           className={`${styles.action} ${styles.search}`}
           placeholder="站内搜索"
-          dataSource={['搜索提示一', '搜索提示二', '搜索提示三']}
+          dataSource={['搜索提1111示一', '搜索提示二', '搜索提示三']}
           onSearch={(value) => {
                 console.log('input', value); // eslint-disable-line
                 }}

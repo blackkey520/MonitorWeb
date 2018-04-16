@@ -9,7 +9,8 @@ export default Model.extend({
   state: {
     columns: [],
     data: [],
-  },
+    CouontryInfo:[]
+  } ,
   effects: {
     * querydata({
       payload,
@@ -18,6 +19,20 @@ export default Model.extend({
       const pollutanttype = pollutanttyperesult.data;
       if (payload.pollutantType == null) {
         payload.pollutantType = pollutanttype[0].ID;
+      }
+      if(!payload.monitortype)
+      {
+        payload.monitortype = "realtime";
+      }
+     
+      if(!payload.keyWords)
+      {
+        payload.keyWords ="";
+      }
+ 
+      if(payload.regionCode!=null && payload.regionCode!="")
+      {
+        payload.regionCode+="000";
       }
       const columnpollutant = yield call(loadPollutant, payload);
       const _this=this;
@@ -72,55 +87,73 @@ export default Model.extend({
           render: (text,record) => <span style={{ color: text ? text.split('|')[1] : '#666666',fontWeight:record.pointType==='country'?'bold':''}}>{text ? text.split('|')[0] : '-'}</span >,
         });
       });
-
+ 
       const result = yield call(loadMonitoroverView, payload);
       const data = [];
       const GroupID=[];
-      result.data.map((item, key) => {
-        const dataitem = {
-          DGIMN: item.DGIMN,
-          status: item.status,
-          point: `${item.pname}-${item.text}`,
-          datetime: item.Times,
-          pointType:"monitorData"
-        };
-        columns.map((columnsitem, columnskey) => {
-          if (columnskey > 2) {
-            dataitem[columnsitem.key] = item[columnsitem.key]
-              ? `${item[columnsitem.key]}|${item[`${columnsitem.key}_color`]}`
-              : '-';
-          }
-        });
-        dataitem.key = key + 1;
-        data.push(dataitem);
-        if(GroupID.indexOf(item.GroupID)==-1&&item.GroupID!=null){
-          GroupID.push(item.GroupID);
-        }
-        payload.GroupID=GroupID;
-      });
-      const results = yield call(loadCountryPointView, payload);
-      if(results!=null){
-        results.data.map((item,key)=>{
+
+      if(result.data!=null || result.length>0)
+      {
+        result.data.map((item, key) => {
           const dataitem = {
             DGIMN: item.DGIMN,
             status: item.status,
-            point: item.text,
+            point: `${item.pname}-${item.text}`,
             datetime: item.Times,
-            pointType:"country"
+            pointType:"monitorData"
           };
-          columns.map((columnsitem,columnskey)=>{
-            if(columnskey>2){
+          columns.map((columnsitem, columnskey) => {
+            if (columnskey > 2) {
               dataitem[columnsitem.key] = item[columnsitem.key]
                 ? `${item[columnsitem.key]}|${item[`${columnsitem.key}_color`]}`
                 : '-';
             }
           });
-          dataitem.key = data.length + 1;
+          dataitem.key = key + 1;
           data.push(dataitem);
+          if(GroupID.indexOf(item.GroupID)==-1&&item.GroupID!=null){
+            GroupID.push(item.GroupID);
+          }
+          payload.GroupID=GroupID;
+          
         });
+     
+        //国控数据加载
+        const results = yield call(loadCountryPointView, payload);
+        const countryPayload= {
+           ...payload,
+           monitortype:'minute'
+        }
+        const countryresults = yield call(loadCountryPointView, countryPayload);
+        yield update({ CouontryInfo: countryresults });
+        if(results!=null){
+       
+          results.data.map((item,key)=>{
+            const dataitem = {
+              DGIMN: item.DGIMN,
+              status: item.status,
+              point: item.text,
+              datetime: item.Times,
+              pointType:"country"
+            };
+            columns.map((columnsitem,columnskey)=>{
+              if(columnskey>2){
+                dataitem[columnsitem.key] = item[columnsitem.key]
+                  ? `${item[columnsitem.key]}|${item[`${columnsitem.key}_color`]}`
+                  : '-';
+              }
+            });
+            dataitem.key = data.length + 1;
+            data.push(dataitem);
+          });
+        }
+        if (result) {
+          yield update({ data, columns });
+        }
       }
-
-      if (result) {
+      else
+      {
+        const data=null;
         yield update({ data, columns });
       }
     },

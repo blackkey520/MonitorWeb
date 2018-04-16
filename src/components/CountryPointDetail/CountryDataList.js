@@ -78,10 +78,12 @@ class CountryDataList extends Component {
               </div>
                     }
             renderItem={item => (
-              <div style={{
+              <div   style={{
                     borderBottomColor: '#e8e8e8',
                 borderBottomWidth: 1,
                 borderBottomStyle: 'solid',
+                height:30,
+                lineHeight:'30px'
               }}
               > <Row gutter={8}>
                 <Col span={14} align="middle" justify="center">{item.MonitorTime}</Col>

@@ -82,6 +82,7 @@ class CountryDetail extends PureComponent {
     this.setState({
       pollutant: value,
     });
+    debugger;
     this.props.dispatch({
       type: 'points/querypointdata',
       payload: {

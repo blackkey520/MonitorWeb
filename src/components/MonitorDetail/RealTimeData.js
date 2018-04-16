@@ -7,7 +7,6 @@ import LineChart from '../PointDetail/LineChart';
 
 class RealTimeData extends Component {
   render() {
-     
     return (
       <div
         style={{ width: '100%',

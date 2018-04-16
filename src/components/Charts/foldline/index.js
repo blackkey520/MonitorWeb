@@ -10,29 +10,38 @@ import DataSet from '@antv/data-set';
 class FoldlineBar extends Component{
 
 render() {
-   
+    
     const {
-      height,
-      title,
-      forceFit = true,
       pollutant,
       color = 'rgba(24, 144, 255, 0.85)',
-      padding, 
-      data,
+      title,
+      height = 800,
+      padding = [60, 20, 40, 40],
+      borderWidth = 2,
+      pointName,
+      data=[{
+        timeY:0,
+      }] ,
+      countryArray
     } = this.props;
-      
+    
+    let pointArray= [];
+    pointArray.push(pointName);
+    countryArray.map((item,key)=>{
+      pointArray.push(item.label);
+    })
+    console.log(pointName)
     let dataType=this.props.dataType
-      const ds = new DataSet(
-      );
+     
       data.map((item,key)=>{
        
         if(dataType=="realTime")
         {
-          item.timeY= moment(item.MonitorTime).format('H:mm:ss');
+          item.timeY= moment(item.MonitorTime).format('HH:mm:ss');
         }
         if(dataType=="minute")
         {
-          item.timeY=  moment(item.MonitorTime).format('H:mm:ss');
+          item.timeY=  moment(item.MonitorTime).format('HH:mm:ss');
         }
         if(dataType=="hour")
         {
@@ -43,30 +52,67 @@ render() {
           item.timeY= item.MonitorTime;
         }
       })
-      const dv = ds.createView().source(data);
-      dv.transform({
-        type: 'fold',
-        fields: [ 'MonitorValue' ], // 展开字段集
-        key: 'dt', // key字段
-        value: 'value', // value字段
-      });
-      const cols = {
-        MonitorTime: {
-           range: [ 0, 1 ]
-        } ,
-        tickCount: 5
-      }
+        let max;
+        let ds = new DataSet();
+        if(data.length>0)
+        {
+            ds = new DataSet({
+            state: {
+              start: data[0].MonitorTime,
+              end: data[data.length - 1].MonitorTime,
+            },
+          });
+        }
+        const dv = ds.createView();
+        dv
+          .source(data)
+          .transform({
+            type: 'map',
+            callback(row) {
+              const newRow = { ...row };
+              newRow[pointName] = row.MonitorValue;
+             
+              countryArray.map((key,item)=>{
+                newRow[key.label]=row[key.key]
+              })
+              return newRow;
+            },
+          })
+          .transform({
+            type: 'fold',
+            fields: pointArray, // 展开字段集
+            key: 'key', // key字段
+            value: 'value', // value字段
+          });
+    
+        const timeScale = {
+          tickCount: 15,
+          range: [0, 1],
+        };
+    
+        const cols = {
+          timeY: timeScale,
+          value: {
+            max,
+            min: 0,
+          },
+        };
+ 
      
-    return(
-        <Chart height={850} data={dv} scale={cols} forceFit style={{marginTop:30}}  > 
-        <Legend />
-        <Axis name="timeY"  />
-        <Axis name="value" label={{formatter: val => `${val}`}}/>
-        <Tooltip crosshairs={{type : "y"}}/>
-        <Geom type="line" position="timeY*value" size={2} color={'dt'} shape={'smooth'} />
-        <Geom type='point' position="timeY*value" size={4} shape={'circle'} color={'dt'} style={{ stroke: '#fff', lineWidth: 1}} />
-      </Chart>
-   );
-}
+    
+        return (
+          <div  style={{ height: height + 30 }}>
+            <div>
+              {title && <h4>{title}</h4>}
+              <Chart height={height} padding={padding} data={dv} scale={cols} forceFit>
+                <Axis name="timeY" />
+                <Tooltip />
+                <Legend name="key" position="top" />
+                <Geom type="line" position={'timeY*value'} size={borderWidth} color="key" />
+              </Chart>
+            </div>
+          </div>
+        );
+      }
 }
 export default FoldlineBar;

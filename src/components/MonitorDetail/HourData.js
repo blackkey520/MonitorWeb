@@ -1,7 +1,7 @@
 // import liraries
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import { Row, Col } from 'antd';
+import { Row, Col ,Spin} from 'antd';
 import DataList from '../PointDetail/DataList';
 import LineChart from '../PointDetail/LineChart';
 
@@ -13,15 +13,19 @@ import LineChart from '../PointDetail/LineChart';
 }))
 class HourData extends Component {
   render() {
+    const {   effects } = this.props;
     return (
       <div
         style={{ width: '100%',
       height: 'calc(100vh - 120px)', }}
       >
+
+         {effects['points/querychartpointdata']?<Spin style={{width: '100%',
+        height: 'calc(100vh - 260px)',marginTop:260 }} size="large" />:
         <Row gutter={8}>
           <Col span={19} ><LineChart  dataType={this.props.dataType}/></Col>
           <Col span={5} > <DataList /></Col>
-        </Row>
+        </Row> }
       </div>
     );
   }

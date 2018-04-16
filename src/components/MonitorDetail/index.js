@@ -2,39 +2,50 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import moment from 'moment';
-import { Tabs, DatePicker, Select, Spin } from 'antd';
+import { message ,Tabs, DatePicker, Select, Spin } from 'antd';
 import { routerRedux } from 'dva/router';
 import RealTimeData from './RealTimeData';
 import MinuteData from './MinuteData';
 import HourData from './HourData';
 import DayData from './DayData';
+import {delay} from '../../utils/utils'
+import { debug } from 'util';
+ 
+
+
 
 const { TabPane } = Tabs;
 const Option = Select.Option;
 
 const RangePicker = DatePicker.RangePicker;
-
-@connect(({ loading, points }) => ({
+@connect(({ loading, points ,monitor,countrypoints}) => ({
   ...loading,
   selpoint: points.selpoint,
+  isfinished:points.isfinished,
   current: points.current,
+  countryPointInfo:monitor.CouontryInfo.data
 }))
 class MonitorDetail extends PureComponent {
   constructor(props) {
     super(props);
     this.menus = props.menuData;
-    this.state = {
+    this.state = { 
       monitortype: 'realtime',
       dateformat: 'YYYY-MM-DD HH:mm:ss',
       querydate: [moment().add(-30, 'm'), moment()],
       pollutant: props.selpoint.PollutantTypeInfo[0].PolluntCode,
+      countryPointInfo:[],
+      countrydgimn:'',
+      PointName: props.selpoint.Point.PointName
     };
-
+     
   }
   onChange=(key) => {
     const newstate = {};
+    
     if (key === 'realtime')
     {
+      newstate.PointName=this.state.PointName;
       newstate.monitortype = key;
       newstate.querydate = [moment().add(-30, 'm'), moment()];
       newstate.dateformat = 'YYYY-MM-DD HH:mm:ss';
@@ -56,6 +67,8 @@ class MonitorDetail extends PureComponent {
     this.setState({
       ...newstate,
     });
+
+   
     this.props.dispatch({
       type: 'points/querypointdata',
       payload: {
@@ -72,6 +85,7 @@ class MonitorDetail extends PureComponent {
     });
   }
   onDateOK=() => {
+     
     this.props.dispatch({
       type: 'points/querypointdata',
       payload: {
@@ -80,11 +94,14 @@ class MonitorDetail extends PureComponent {
         ...this.state,
       },
     });
+   
   }
   onPollutantChange=(value) => {
+ 
     this.setState({
       pollutant: value,
     });
+    
     this.props.dispatch({
       type: 'points/querypointdata',
       payload: {
@@ -95,8 +112,36 @@ class MonitorDetail extends PureComponent {
       },
     });
   }
+  onCountryChange=(value)=>{ 
+    if(!this.props.isfinished)
+    {
+      if(value.length>5)
+    {
+      return  message.info('最多只能选择5个点对比');
+    }
+    
+    this.setState({
+      countryPointInfo: value,
+      countrydgimn:value
+    });
+    this.props.dispatch({
+      type: 'points/querychartpointdata',
+      payload: {
+         ...this.state,
+         dgimn: this.props.selpoint.Point.Dgimn,
+         current: 1,
+         countrydgimn:value,
+      },
+    });
+    }else{
+      return  message.info('您操作的太快了');
+    }
+    
+  }
   render() {
-    const { selpoint, effects } = this.props;
+    const { selpoint, effects ,countryPointInfo} = this.props;
+    debugger;
+    console.log(this.props.isfinished);
     return (
       <div
         style={{ width: '100%',
@@ -106,7 +151,19 @@ class MonitorDetail extends PureComponent {
           onChange={this.onChange}
           tabBarExtraContent={
             <div>
-              <Select value={this.state.pollutant} style={{ width: 120 }} onChange={this.onPollutantChange}>
+               {
+                 this.state.monitortype!="realtime" && this.state.monitortype!="minute"?
+                  <Select mode="multiple"   
+                  value={this.state.countryPointInfo} style={{ width: 500 }} onChange={this.onCountryChange} labelInValue={true}   placeholder="请选择对比国控点">
+                  {
+                      countryPointInfo.map((item, key) => {
+                        return <Option key={key} value={item.DGIMN}>{item.text}</Option>;
+                      })
+                    }
+                  </ Select>: 
+                  <div></div>
+               }
+              <Select value={this.state.pollutant} style={{ width: 120 }} onChange={this.onPollutantChange} style={{ marginLeft: 10 }}>
                 {
                   selpoint.PollutantTypeInfo.map((item, key) => {
                     return <Option key={key} value={item.PolluntCode}>{item.PolluntName}</Option>;

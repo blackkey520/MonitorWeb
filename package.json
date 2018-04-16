@@ -1,7 +1,7 @@
 {
-  "name": "ant-design-pro",
+  "name": "MonitorWeb",
   "version": "0.3.1",
-  "description": "An out-of-box UI solution for enterprise applications",
+  "description": "MonitorClient in WebBrose",
   "private": true,
   "scripts": {
     "start": "roadhog server",

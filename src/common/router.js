@@ -75,7 +75,7 @@ export const getRouterData = (app) => {
       component: dynamicWrapper(app, ['user', 'login'], () => import('../layouts/MonitorLayout')),
     },
     '/monitor/list': {
-      component: dynamicWrapper(app, ['monitor', 'points'], () => import('../routes/MonitorDataList')),
+      component: dynamicWrapper(app, ['monitor', 'points','countrypoints'], () => import('../routes/MonitorDataList')),
     },
     '/monitor/map': {
       component: dynamicWrapper(app, ['points'], () => import('../routes/MonitorDataMap')),
@@ -92,6 +92,7 @@ export const getRouterData = (app) => {
     '/user/register-result': {
       component: dynamicWrapper(app, [], () => import('../routes/User/RegisterResult')),
     },
+
     // '/user/:id': {
     //   component: dynamicWrapper(app, [], () => import('../routes/User/SomeComponent')),
     // },
