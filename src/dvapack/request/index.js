@@ -23,9 +23,11 @@ async function geturl(url, tooken) {
   const usertoken = Cookie.get('token');
   let newurl = url;
   if (!tooken) {
-    const user = JSON.parse(usertoken);
-    if (user != null) {
-      newurl += `?authorCode=${user.User_ID}`;
+    if(usertoken){
+      const user = JSON.parse(usertoken);
+      if (user != null) {
+        newurl += `?authorCode=${user.User_ID}`;
+      }
     }
   } else if (tooken !== 'notooken') {
     newurl += `?authorCode=${tooken}`;

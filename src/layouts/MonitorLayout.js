@@ -31,6 +31,7 @@ const getRedirect = (item) => {
     }
   }
 };
+
 getMenuData().forEach(getRedirect);
 
 const { Content } = Layout;

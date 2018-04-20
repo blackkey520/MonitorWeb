@@ -190,7 +190,7 @@ export default class MonitorHeader extends PureComponent {
   * 获得菜单子节点
   * @memberof SiderMenu
   */
-  getNavMenuItems = (menusData) => {
+  getNavMenuItems = (menusData) => {    
     if (!menusData) {
       return [];
     }
