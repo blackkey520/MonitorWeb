@@ -42,7 +42,8 @@ export default Model.extend({
     Tablewidth:280,
     countryArray:[],
     countryid:[],
-    pointName:""
+    pointName:"",
+    levels:[]
   },
   effects: {
     * querypointdetail({
@@ -102,6 +103,9 @@ export default Model.extend({
             current: 1, 
             dateformat: 'YYYY-MM-DD HH:mm:ss' },
         });
+        //获取报警级别
+        let levels=data.MonitorPointPollutant[0].Levels;
+        yield update({ levels });
     },
     //国控对比数据
     * querychartpointdata({

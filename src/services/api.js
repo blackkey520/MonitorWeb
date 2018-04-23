@@ -180,7 +180,8 @@ export async function getAllPointAlarmInfo(params) {
   const body = {
     time: params.time,
   };
-  const result = await get('/api/rest/AlarmDealInfoApi/GetAllPointExceptionInfo', body, null);
+  // const result = await get('/api/rest/AlarmDealInfoApi/GetAllPointExceptionInfo', body, null);
+  const result = await get('/api/rest/AtmosphereApi/AlarmData/GetAlarmToVerifyList', body, null);
   
   return result === null ? { data: null } : result;
 }
