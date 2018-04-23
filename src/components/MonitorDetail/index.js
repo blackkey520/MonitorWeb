@@ -29,14 +29,16 @@ class MonitorDetail extends PureComponent {
   constructor(props) {
     super(props);
     this.menus = props.menuData;
+    debugger;
+    console.log(props.selpoint.pollutantList[0].pollutantCode)
     this.state = { 
       monitortype: 'realtime',
       dateformat: 'YYYY-MM-DD HH:mm:ss',
       querydate: [moment().add(-30, 'm'), moment()],
-      pollutant: props.selpoint.PollutantTypeInfo[0].PolluntCode,
+      pollutant:  props.selpoint.pollutantList[0].pollutantCode,
       countryPointInfo:[],
       countrydgimn:'',
-      PointName: props.selpoint.Point.PointName,
+      PointName: props.selpoint.pointName,
       countrylength:0
     };
      
@@ -86,11 +88,10 @@ class MonitorDetail extends PureComponent {
     });
   }
   onDateOK=() => {
-     
     this.props.dispatch({
       type: 'points/querypointdata',
       payload: {
-        dgimn: this.props.selpoint.Point.Dgimn,
+        dgimn: this.props.selpoint.DGIMN,
         current: 1,
         ...this.state,
       },
@@ -106,7 +107,7 @@ class MonitorDetail extends PureComponent {
     this.props.dispatch({
       type: 'points/querypointdata',
       payload: {
-        dgimn: this.props.selpoint.Point.Dgimn,
+        dgimn: this.props.selpoint.DGIMN,
         current: 1,
         ...this.state,
         pollutant: value,
@@ -142,6 +143,7 @@ class MonitorDetail extends PureComponent {
     })
   }
   render() {
+
     const { selpoint, effects ,countryPointInfo} = this.props;
     return (
       <div
@@ -166,8 +168,8 @@ class MonitorDetail extends PureComponent {
                }
               <Select value={this.state.pollutant} style={{ width: 120 }} onChange={this.onPollutantChange} style={{ marginLeft: 10 }}>
                 {
-                  selpoint.PollutantTypeInfo.map((item, key) => {
-                    return <Option key={key} value={item.PolluntCode}>{item.PolluntName}</Option>;
+                  selpoint.pollutantList.map((item, key) => {
+                    return <Option key={key} value={item.pollutantCode}>{item.pollutantName}</Option>;
                   })
                 }
               </Select>

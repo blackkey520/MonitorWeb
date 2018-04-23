@@ -34,7 +34,6 @@ class CountryDetail extends PureComponent {
   }
   onChange=(key) => {
     const newstate = {};
-    debugger;
     if (key === 'hour')
     {
       newstate.monitortype = key;
@@ -82,7 +81,6 @@ class CountryDetail extends PureComponent {
     this.setState({
       pollutant: value,
     });
-    debugger;
     this.props.dispatch({
       type: 'points/querypointdata',
       payload: {

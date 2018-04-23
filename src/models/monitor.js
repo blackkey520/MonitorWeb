@@ -18,7 +18,7 @@ export default Model.extend({
       const pollutanttyperesult = yield call(loadPollutantType);
       const pollutanttype = pollutanttyperesult.data;
       if (payload.pollutantType == null) {
-        payload.pollutantType = pollutanttype[0].ID;
+        payload.pollutantType = pollutanttype[0].PollutantTypeCode ;
       }
       if(!payload.monitortype)
       {
@@ -94,25 +94,27 @@ export default Model.extend({
 
       if(result.data!=null || result.length>0)
       {
+       console.log(result.data)
         result.data.map((item, key) => {
           const dataitem = {
             DGIMN: item.DGIMN,
             status: item.status,
-            point: `${item.pname}-${item.text}`,
-            datetime: item.Times,
+            point: `${item.parentName}-${item.pointName}`,
+            datetime: item.MonitorTime,
             pointType:"monitorData"
           };
           columns.map((columnsitem, columnskey) => {
             if (columnskey > 2) {
-              dataitem[columnsitem.key] = item[columnsitem.key]
-                ? `${item[columnsitem.key]}|${item[`${columnsitem.key}_color`]}`
+              dataitem[columnsitem.key] = item.value[columnsitem.key]
+                ? `${item.value[columnsitem.key]}|${item.value[`${columnsitem.key}_params`]?item.value[`${columnsitem.key}_params`].split('§')[3]:""}`
                 : '-';
             }
           });
           dataitem.key = key + 1;
+          console.log(dataitem);
           data.push(dataitem);
-          if(GroupID.indexOf(item.GroupID)==-1&&item.GroupID!=null){
-            GroupID.push(item.GroupID);
+          if(GroupID.indexOf(item.groupID)==-1&&item.groupID!=null){
+            GroupID.push(item.groupID);
           }
           payload.GroupID=GroupID;
           

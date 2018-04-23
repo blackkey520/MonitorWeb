@@ -30,7 +30,7 @@ render() {
     countryArray.map((item,key)=>{
       pointArray.push(item.label);
     })
-    console.log(pointName)
+ 
     let dataType=this.props.dataType
      
       data.map((item,key)=>{

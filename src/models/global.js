@@ -20,6 +20,7 @@ export default Model.extend({
       yield update({ pollutanttype });
     },
     *fetchNotices({payload}, { call, put }) {
+       
       yield put({
         type: 'changeNoticeLoading',
         payload: true,

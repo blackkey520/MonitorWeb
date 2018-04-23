@@ -15,7 +15,12 @@ const menuData = [
         name: '监测数据地图',
         path: 'map',
         icon: 'environment-o',
-      },
+      } ,
+      {
+        name: '全文搜索',
+        path: 'search',
+        icon: 'bars',
+      } 
     ],
   }
 ];
