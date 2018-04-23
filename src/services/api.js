@@ -3,22 +3,22 @@ import moment from 'moment';
 
 export async function fakeAccountLogin(params) {
   const body = {
-    User_Name: params.User_Account,
+    User_Account: params.User_Account,
     USer_Pwd: params.User_Pwd,
   };
-  const result = await post('/api/rest/Author/IsLogins/', body, null, 'notooken');
+  const result = await post('/api/rest/AtmosphereApi/Author/IsLogins/', body, null, 'notooken');
 
   return result === null ? { data: null } : result;
 }
 export async function loadPollutantType() {
-  const result = await get('/api/rest/MenuInfo/GetPolluntType/', {}, null);
+  const result = await post('/api/rest/AtmosphereApi/Cod/GetPollutantTypesByUserId/', {}, null);
   return result === null ? { data: null } : result;
 }
 export async function loadLastdata(params) {
   const body = {
     dgimn: params.dgimn,
   };
-  const result = await get('/api/rest/OutputAsPointApi/GetPointNewRealTimeData/', body, null);
+  const result = await get('/api/rest/AtmosphereApi/OutputAsPointApi/GetPointNewRealTimeData/', body, null);
   return result === null ? { data: null } : result;
 }
 
@@ -42,13 +42,13 @@ export async function maploadMonitorDatalist(params)
         }
         let url = '';
         if (params.dataType === 'realtime') {
-          url = '/api/rest/RealTime/GetRealTimeData/';
+          url = '/api/rest/AtmosphereApi/RealTime/GetRealTimeData/';
         } else if (params.dataType === 'minute') {
-          url = '/api/rest/Minute/GetMinuteData/';
+          url = '/api/rest/AtmosphereApi/Minute/GetMinuteData/';
         } else if (params.dataType === 'hour'  ) {
-          url = '/api/rest/Hour/GetHourSinglePollutantData/';
+          url = '/api/rest/AtmosphereApi/Hour/GetHourSinglePollutantData/';
         } else if (params.dataType === 'day'  ) {
-          url = '/api/rest/Day/GetDaySinglePollutantData/';
+          url = '/api/rest/AtmosphereApi/Day/GetDaySinglePollutantData/';
         }
         const resultdata = await get(url, body, null);
         result=result.concat(resultdata.data);
@@ -58,30 +58,23 @@ export async function maploadMonitorDatalist(params)
 
 export async function loadMonitorDatalist(params) {
   const body = {
-    DGIMN: params.DGIMN,
+    DGIMNs: params.DGIMN,
     BeginTime: params.BeginTime,
     EndTime: params.EndTime,
     pageIndex: params.pageIndex,
     pageSize: params.pageSize,
-    pointType:params.pointType,
-    New:""
   };
-  if(params.PollutantCode)
-  {
-    body.PollutantCode=params.PollutantCode;
-  }
-   
   let url = '';
   if (params.dataType === 'realtime') {
-    url = '/api/rest/RealTime/GetRealTimeData/';
+    url = '/api/rest/AtmosphereApi/RealTime/GetRealTimeData';
   } else if (params.dataType === 'minute') {
-    url = '/api/rest/Minute/GetMinuteData/';
+    url = '/api/rest/AtmosphereApi/Minute/GetMinuteData';
   } else if (params.dataType === 'hour'  ) {
-    url = '/api/rest/Hour/GetHourSinglePollutantData/';
+    url = '/api/rest/AtmosphereApi/Hour/GetHourData';
   } else if (params.dataType === 'day'  ) {
-    url = '/api/rest/Day/GetDaySinglePollutantData/';
+    url = '/api/rest/AtmosphereApi/Day/GetDayData';
   }
-  const result = await get(url, body, null);
+  const result = await post(url, body, null);
   return result;
 }
 
@@ -113,29 +106,30 @@ export async function loadCountryMonitorDatalist(params) {
 export async function loadMonitoroverView(params) {
  
   const body = {
-    pollutantType: params.pollutantType,
+    pollutantTypes: params.pollutantType,
     GroupId: '',
-    regionCode:params.regionCode,
-    keyWords:params.keyWords,
+    regionCodes:params.regionCode,
+    pointName:params.keyWords,
   }; 
   let url;
   if (params.monitortype === 'realtime') {
-    url = '/api/rest/OutputAsPointApi/GetPointNewRealTimeDataByPollutantType/';
+    body.dataType="RealTimeData";
   } else if (params.monitortype === 'minute') {
-    url = '/api/rest/OutputAsPointApi/GetPointNewMinuteDataByPollutantType/';
+    body.dataType="MinuteData";
   } else if (params.monitortype === 'hour') {
-    url = '/api/rest/OutputAsPointApi/GetPointNewHourDataByPollutantType/';
+    body.dataType="HourData";
   } else if (params.monitortype === 'day') {
-    url = '/api/rest/OutputAsPointApi/GetPointNewDayDataByPollutantType/';
+    body.dataType="DayData";
   }
-  const result = await get(url, body, null);
+  url = '/api/rest/AtmosphereApi/PointAndData/GetPointAllList';
+  const result = await post(url, body, null);
   return result;
 }
 export async function loadPollutant(params) {
   const body = {
-    pollutantType: params.pollutantType,
+    pollutantTypes: params.pollutantType,
   };
-  const result = await get('/api/rest/OutputAsPointApi/GetPollutantCodes/', body, null);
+  const result = await post('/api/rest/AtmosphereApi/Cod/GetPollutants', body, null);
   return result;
 }
 export async function loadMonitorPoint(params) {
@@ -149,37 +143,36 @@ export async function loadMonitorPoint(params) {
 }
 export async function loadPointDetail(params) {
   const body = {
-    dgimn: params.dgimn,
-    fileLength: params.fileLength,
-    width: params.width,
-    height: '',
+    DGIMNs: params.dgimn,
+    dataType:params.monitortype
   };
-  const result = await get('/api/rest/OutputAsPointApi/GetPointBaseInfo/', body, null);
-  return result;
+  const result = await post('/api/rest/AtmosphereApi/PointAndData/GetOnePoint', body, null);
+  return result.data;
 }
 export async function loadCountryPointView(params) {
-  if(!params.DGIMN)
-  params.DGIMN="";
+  let groupstr="";
+  params.GroupID.map(item=>{
+    groupstr+=item+",";
+  })
   const body = {
-    SearchTime:'',
-    GroupID:params.GroupID,
-    AQI:'',
-    PrimaryPollutantCode:'',
-    DGIMN:params.DGIMN,
-    New:""
+    GroupIDs:groupstr,
+    pollutantTypes:'23,24,25',
   };
   let url;
   if (params.monitortype === 'minute') {
-    url = '/api/rest/ControlData/GetLastHourData/';
+    body.dataType='MinuteData';
+    url = '/api/rest/AtmosphereApi/PointAndData/GetPointAllList';
   } else if (params.monitortype === 'hour') {
-    url = '/api/rest/ControlData/GetLastHourData/';
+    body.dataType='HourData';
+    url = '/api/rest/AtmosphereApi/PointAndData/GetPointAllList';
   } else if (params.monitortype === 'day') {
-    url = '/api/rest/ControlData/GetLastDayData/';
+    body.dataType='DayData';
+    url = '/api/rest/AtmosphereApi/PointAndData/GetPointAllList';
   }else{
     return null;
   }
-  const result = await get(url, body, null);
-  return result;
+  const result = await post(url, body, null);
+  return result.data;
 }
 
 
@@ -202,4 +195,13 @@ export async function getAllExceptionInfo(params) {
   };
   const result = await get('/api/rest/AlarmDealInfoApi/GetAllExceptionInfo', body, null);  
   return result === null ? { data: null } : result;
+}
+
+export async function queryLxSearchInfo(params) {
+  const body = {
+    searchName: params.searchName,
+    isLx:params.isLx,
+  };
+  const result = await get('/api/rest/OutputAsPointApi/GetLxSearchResult', body, null);  
+  return result.data;
 }

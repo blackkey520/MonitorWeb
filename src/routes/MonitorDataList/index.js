@@ -126,13 +126,13 @@ class MonitorDataList extends Component {
                   }
                 ));
             }}
-              defaultValue={pollutanttype[0].Name}
+              defaultValue={pollutanttype[0].PollutantTypeName}
               size="default"
               style={{ width: 100, marginLeft: 10 }}
             >
               {
             pollutanttype.map((item, key) => {
-              return <Option key={key} value={item.ID}>{item.Name}</Option>;
+              return <Option key={key} value={item.PollutantTypeCode}>{item.PollutantTypeName}</Option>;
             })
         }
             </Select>
@@ -160,6 +160,7 @@ class MonitorDataList extends Component {
             bodyStyle={{ height: 'calc(100vh - 300px)' }}
             onRow={record => ({
               onClick: () => {
+                debugger;
                 this.setState({
                     showdetail:true,
                     countryshowdetail:false
@@ -174,7 +175,7 @@ class MonitorDataList extends Component {
 
         </Card >
         <Modal
-          title={this.props.selpoint !== null ? `${this.props.selpoint.Point.TargetName}-${this.props.selpoint.Point.PointName}` : '详细信息'}
+          title={this.props.selpoint !== null ? `${this.props.selpoint.parentName}-${this.props.selpoint.pointName}` : '详细信息'}
           visible={this.state.showdetail}
           width={SCREEN_WIDTH - 40}
           style={{ top: 20 }}

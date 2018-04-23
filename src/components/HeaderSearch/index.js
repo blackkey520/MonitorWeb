@@ -38,7 +38,7 @@ export default class HeaderSearch extends PureComponent {
   onChange = (value) => {
     this.setState({ value });
     if (this.props.onChange) {
-      this.props.onChange();
+      this.props.onChange(value);
     }
   }
   enterSearchMode = () => {

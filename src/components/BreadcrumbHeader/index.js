@@ -1,6 +1,7 @@
 import React, { PureComponent, createElement } from 'react';
 import PropTypes from 'prop-types';
 import { Breadcrumb } from 'antd';
+import { getMenuArray } from '../../common/menu'
 import styles from './index.less';
 
 
@@ -49,7 +50,7 @@ export default class BreadcrumbHeader extends PureComponent {
       }, route.breadcrumbName);
   }
   render() {
-    const { routes, params, location, breadcrumbNameMap } = this.getBreadcrumbProps();
+    const { routes, params, location, breadcrumbNameMap } = this.getBreadcrumbProps();    
     const {
       breadcrumbList, linkElement = 'a',
     } = this.props;
@@ -69,13 +70,24 @@ export default class BreadcrumbHeader extends PureComponent {
         if (index > 0) {
           const url = `/${pathSnippets.slice(0, index + 1).join('/')}`;
           const currentBreadcrumb = getBreadcrumb(breadcrumbNameMap, url);
+          let cc = currentBreadcrumb.name;
+          if (!currentBreadcrumb) {
+            var mus = getMenuArray();
+            var findmenu = mus.find(t => "/" + t.path == url);
+            if (findmenu) {
+              cc = findmenu.name;
+            }
+          }
           const isLinkable = (index !== pathSnippets.length - 1) && currentBreadcrumb.component;
+          const a = isLinkable ? linkElement : 'span';
+          const b = { [linkElement === 'a' ? 'href' : 'to']: url };
+          const c = cc || url;
           return (
             <Breadcrumb.Item key={url}>
               {createElement(
-                isLinkable ? linkElement : 'span',
-                { [linkElement === 'a' ? 'href' : 'to']: url },
-                currentBreadcrumb.name || url,
+                a,
+                b,
+                c,
               )}
             </Breadcrumb.Item>
           );

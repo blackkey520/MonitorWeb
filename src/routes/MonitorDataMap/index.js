@@ -147,13 +147,13 @@ class MonitorDataMap extends PureComponent {
                   }
                 ));
             }}
-              defaultValue={pollutanttype[0].Name}
+              defaultValue={pollutanttype[0].PollutantTypeName}
               size="default"
               style={{ width: 100, marginLeft: 10 }}
             >
               {
             pollutanttype.map((item, key) => {
-              return <Option key={key} value={item.ID}>{item.Name}</Option>;
+              return <Option key={key} value={item.PollutantTypeCode}>{item.PollutantTypeName}</Option>;
             })
         }
             </Select>

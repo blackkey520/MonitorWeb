@@ -20,6 +20,7 @@ export default Model.extend({
       yield update({ pollutanttype });
     },
     *fetchNotices({payload}, { call, put }) {
+       
       yield put({
         type: 'changeNoticeLoading',
         payload: true,
@@ -117,7 +118,6 @@ export default Model.extend({
     //   });
     // },
   //   socket({dispatch}){ // socket相关
-  //     debugger;
   //     return service.listen(data => {
   //         switch (data.type) {
   //             case 'connect':

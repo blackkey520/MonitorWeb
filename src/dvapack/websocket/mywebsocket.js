@@ -12,8 +12,6 @@
 //         const user = JSON.parse(response);
 //         if(user)
 //           ws.send(user.User_Account);          
-//     }else{
-//         ws.send("system");
 //     }
 //   };
 
@@ -28,16 +26,14 @@
 //   ws.onmessage = event => {
 //     console.log(`Roundtrip time: ${Date.now() - event.data} ms`);
 
-//     setTimeout(() => {
-//         const response = Cookie.get('token');
-//         if (response) {        
-//             const user = JSON.parse(response);
-//             if(user)
-//               ws.send(user.User_Account);
-//         }else{
-//             ws.send("system");
-//         }
-//     }, 3000000);
+    // setTimeout(() => {
+    //     const response = Cookie.get('token');
+    //     if (response) {        
+    //         const user = JSON.parse(response);
+    //         if(user)
+    //           ws.send(user.User_Account);
+    //     }
+    // }, 30000);
 
 //     cb(event.data);
 //   };

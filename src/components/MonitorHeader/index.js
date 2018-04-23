@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+import { connect } from 'dva';
 import groupBy from 'lodash/groupBy';
 import moment from 'moment';
 import { Layout, Menu, Icon, Spin, Tag, Dropdown, Avatar,Modal,Form, Input,Tooltip, Cascader, Select, Row, Col, Checkbox, Button, AutoComplete  } from 'antd';
@@ -9,9 +10,10 @@ import NoticeIcon from '../../components/NoticeIcon';
 import HeaderSearch from '../../components/HeaderSearch';
 import styles from './index.less';
 import config from '../../config';
-import logo from '../../assets/logo.svg';
+import logo from '../../../public/sdlicon.png';
 import MessageDetail from '../../components/MessageDetail'
 import ChangePwdDetail from '../ChangePwdDetail';
+
 
 
 const { Header } = Layout;
@@ -26,6 +28,9 @@ const getIcon = (icon) => {
   }
   return icon;
 };
+@connect( ({search})=>({
+   lxsearchinfo:search.lxsearchinfo
+}))
 export default class MonitorHeader extends PureComponent {
   constructor(props) {
     super(props);
@@ -37,6 +42,7 @@ export default class MonitorHeader extends PureComponent {
       alarmTime:0,
       DGIMN:"",
       datetime:null,
+      oldvalue:""
     };
   }
   componentDidMount() {
@@ -190,7 +196,7 @@ export default class MonitorHeader extends PureComponent {
   * 获得菜单子节点
   * @memberof SiderMenu
   */
-  getNavMenuItems = (menusData) => {
+  getNavMenuItems = (menusData) => {    
     if (!menusData) {
       return [];
     }
@@ -262,6 +268,32 @@ handleNoticeVisibleChange = (visible) => {
     });
   }
 }
+onSearch=(value)=>{ 
+   
+}
+
+onPressEnter=(value)=>{ 
+   
+}
+onChange=(value)=>{
+  let _this=this;
+  this.setState({
+    oldvalue:value
+   })
+  setTimeout(function () {
+    if(_this.state.oldvalue==value)
+    {
+      _this.props.dispatch({
+        type: 'search/queryLxSearchResult',
+        payload:{
+          value:value
+        }
+      });
+    }
+  }, 1000);
+}
+
+
 render() {
   const {
     currentUser, fetchingNotices,
@@ -286,28 +318,23 @@ render() {
   if (!selectedKeys.length) {
     selectedKeys = [openKeys[openKeys.length - 1]];
   }
+
+
+  
   return (
     <Header className={styles.header}>
-
       <div className={styles.logo}>
-
-        <img src={logo} alt="logo" />
+        <img src={logo} alt="logo"  />
         <h1>{config.name}</h1>
-
-
       </div>
-
       <div className={styles.right}>
         <HeaderSearch
           className={`${styles.action} ${styles.search}`}
           placeholder="站内搜索"
-          dataSource={['搜索提1111示一', '搜索提示二', '搜索提示三']}
-          onSearch={(value) => {
-                console.log('input', value); // eslint-disable-line
-                }}
-          onPressEnter={(value) => {
-                console.log('enter', value); // eslint-disable-line
-                }}
+          dataSource={this.props.lxsearchinfo}
+          onSearch={ this.onSearch }
+          onChange={this.onChange }
+          onPressEnter={this.onPressEnter}
           />
         <NoticeIcon
           className={styles.action}

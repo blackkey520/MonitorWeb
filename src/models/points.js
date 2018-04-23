@@ -74,22 +74,29 @@ export default Model.extend({
       }];
       countryid=[];
       countryArray=[];
-     
-      if(pointName=="monitorData")
+      if(payload.pointType=="monitorData")
+      {
+        payload.monitortype="RealTime";
         pointName=payload.point.split('-')[1];
+      }
       else
+      {
         pointName=payload.point;
+        payload.monitortype="HourData";
+      }
+        
       yield update({ Tablewidth });
       yield update({ columns });
       yield update({ pointName });
       yield update({ countryid });
       yield update({ countryArray });
-      const { data } = yield call(loadPointDetail, { dgimn: payload.DGIMN, fileLength: 50000, width: 300 });
-      yield update({ selpoint: data });
+      const data = yield call(loadPointDetail, { dgimn: payload.DGIMN,monitortype:payload.monitortype });
+      yield update({ selpoint: data[0] });
         yield put({
           type: 'querypointdata',
-          payload: { dgimn: payload.DGIMN, 
-            pollutant: data.PollutantTypeInfo[0].PolluntCode, 
+          payload: { 
+            dgimn: payload.DGIMN, 
+            pollutant: data.pollutantType, 
             querydate:  payload.pointType=="monitorData"?[moment().add(-30, 'm'), moment()]:[moment().add(-24, 'h'), moment()],
             monitortype: payload.pointType=="monitorData"?"realtime":"hour",
             pointType:payload.pointType,
@@ -104,7 +111,7 @@ export default Model.extend({
     * querychartpointdata({
          payload,
      }, { call, update, put, select }) {
-      
+        
          yield update({isfinished:true});
          const { size } = yield select(_ => _.points);
          let { chartdata } = yield select(_ => _.points);
@@ -180,7 +187,6 @@ export default Model.extend({
          }
          else
          {
-          
           let dgimn='';
           let existdata ='';
           let exist='';
@@ -256,6 +262,8 @@ export default Model.extend({
            dataType: payload.monitortype,
            pointType:payload.pointType,
          });
+
+         console.log(result);
          if(!payload.isclear)
          {
            const resultdata = yield call(loadMonitorDatalist, { 
@@ -327,10 +335,11 @@ export default Model.extend({
     * querypointdata({
       payload,
     }, { call, update, put, select }) {
-
       const { size } = yield select(_ => _.points);
       const pointType=payload.pointType;
       const PollutantCode=payload.pollutant;
+      debugger;
+      console.log(PollutantCode);
       const result = yield call(loadMonitorDatalist, { 
         PollutantCode: payload.pollutant,
         DGIMN: payload.dgimn,
@@ -345,23 +354,27 @@ export default Model.extend({
       const resultda = [];
       if (result.data !== null)
       {
+
+        
         result.data.map((item, key) => {
+          debugger;
           if (payload.monitortype === 'realtime')
           {
+            item.MonitorValue = item[PollutantCode];
             resultda.push(item);
           } else if (payload.monitortype === 'minute')
           {
-            item.MonitorValue = item.AvgValue;
+            item.MonitorValue = item[PollutantCode];
             resultda.push(item);
           } else if (payload.monitortype === 'hour' )
           {
-            item.MonitorValue = item.AvgValue;
+            item.MonitorValue = item[PollutantCode];
             item.MonitorTime = moment(item.MonitorTime).format('YYYY-MM-DD HH');
             resultda.push(item);
           }
           else if (payload.monitortype === 'day' )
           {
-            item.MonitorValue = item.AvgValue;
+            item.MonitorValue = item[PollutantCode];
             item.MonitorTime = moment(item.MonitorTime).format('YYYY-MM-DD');
             resultda.push(item);
           }
@@ -426,7 +439,7 @@ export default Model.extend({
     }, { call, select, update }) {
       const { pollutanttype } = yield select(_ => _.global);
       if (payload.pollutantType == null) {
-        payload.pollutantType = pollutanttype[0].ID;
+        payload.pollutantType = pollutanttype[0].PollutantTypeCode;
       }
       const result = yield call(loadMonitorPoint, payload);
       const pointlist = result.data;
