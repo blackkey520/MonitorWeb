@@ -34,7 +34,6 @@ export async function maploadMonitorDatalist(params)
           pageIndex: params.pageIndex,
           pageSize: params.pageSize,
           pointType:params.pointType,
-          New:""
         };
         if(params.PollutantCode)
         {
@@ -42,15 +41,15 @@ export async function maploadMonitorDatalist(params)
         }
         let url = '';
         if (params.dataType === 'realtime') {
-          url = '/api/rest/AtmosphereApi/RealTime/GetRealTimeData/';
+          url = '/api/rest/AtmosphereApi/RealTime/GetRealTimeData';
         } else if (params.dataType === 'minute') {
-          url = '/api/rest/AtmosphereApi/Minute/GetMinuteData/';
+          url = '/api/rest/AtmosphereApi/Minute/GetMinuteData';
         } else if (params.dataType === 'hour'  ) {
-          url = '/api/rest/AtmosphereApi/Hour/GetHourSinglePollutantData/';
+          url = '/api/rest/AtmosphereApi/Hour/GetHourData';
         } else if (params.dataType === 'day'  ) {
-          url = '/api/rest/AtmosphereApi/Day/GetDaySinglePollutantData/';
+          url = '/api/rest/AtmosphereApi/Day/GetDayData';
         }
-        const resultdata = await get(url, body, null);
+        const resultdata = await post(url, body, null);
         result=result.concat(resultdata.data);
       }
         return result;
@@ -63,6 +62,7 @@ export async function loadMonitorDatalist(params) {
     EndTime: params.EndTime,
     pageIndex: params.pageIndex,
     pageSize: params.pageSize,
+    pollutantCodes:params.PollutantCode
   };
   let url = '';
   if (params.dataType === 'realtime') {

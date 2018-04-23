@@ -52,11 +52,11 @@ const fetchtimeout = (requestPromise, timeout = 30000) => {
 async function request(url, _options) {
   const options = _options || {};
   options.method = options.method || 'GET';
-  options.headers = options.headers || {};
+  options.headers = options.headers || {};``
   const resp = await fetch(url, options);
   console.log(`status${resp.status}`);
   const text = await resp.text();
-  console.log('RESP:', text);
+  console.log('RESP:', text);``
   try {
     const json = await JSON.parse(text); 
     // 如果请求失败
