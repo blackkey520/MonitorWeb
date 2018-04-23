@@ -68,7 +68,7 @@ export default class Login extends Component {
   componentDidMount(){
     this.props.form.setFieldsValue({
       User_Account: 'system',
-      User_Pwd:"system"
+      User_Pwd:"P@ssw0rd"
     });
   }
 
