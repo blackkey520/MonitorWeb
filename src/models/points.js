@@ -236,12 +236,7 @@ export default Model.extend({
                   key: exist.key,
                  })
              }
-             else
-             {
-                columns.splice(existdata+1,1)
-                countryArray.splice(existdata-1,1);
-                countryid.splice(existdata-1,1);
-             }
+          
           }
          
           

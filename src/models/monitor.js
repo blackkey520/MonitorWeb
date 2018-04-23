@@ -163,7 +163,7 @@ export default Model.extend({
   subscriptions: {
     setup({ dispatch, history }) {
       return history.listen(({ pathname, payload }) => {
-        if (pathname === '/monitor/list') {
+        if (pathname === '/monitor/list/mlist') {
           const { pollutantType = null,regionCode='',keyWords='',searchTime = moment().format('YYYY-MM-DD'), monitortype = 'realtime',GroupID=[] } = payload || {};
           dispatch({ type: 'querydata',
             payload: {
