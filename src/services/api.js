@@ -6,19 +6,19 @@ export async function fakeAccountLogin(params) {
     User_Account: params.User_Account,
     USer_Pwd: params.User_Pwd,
   };
-  const result = await post('/api/rest/Author/IsLogins/', body, null, 'notooken');
+  const result = await post('/api/rest/AtmosphereApi/Author/IsLogins/', body, null, 'notooken');
 
   return result === null ? { data: null } : result;
 }
 export async function loadPollutantType() {
-  const result = await post('/api/rest/Cod/GetPollutantTypesByUserId/', {}, null);
+  const result = await post('/api/rest/AtmosphereApi/Cod/GetPollutantTypesByUserId/', {}, null);
   return result === null ? { data: null } : result;
 }
 export async function loadLastdata(params) {
   const body = {
     dgimn: params.dgimn,
   };
-  const result = await get('/api/rest/OutputAsPointApi/GetPointNewRealTimeData/', body, null);
+  const result = await get('/api/rest/AtmosphereApi/OutputAsPointApi/GetPointNewRealTimeData/', body, null);
   return result === null ? { data: null } : result;
 }
 
@@ -42,13 +42,13 @@ export async function maploadMonitorDatalist(params)
         }
         let url = '';
         if (params.dataType === 'realtime') {
-          url = '/api/rest/RealTime/GetRealTimeData/';
+          url = '/api/rest/AtmosphereApi/RealTime/GetRealTimeData/';
         } else if (params.dataType === 'minute') {
-          url = '/api/rest/Minute/GetMinuteData/';
+          url = '/api/rest/AtmosphereApi/Minute/GetMinuteData/';
         } else if (params.dataType === 'hour'  ) {
-          url = '/api/rest/Hour/GetHourSinglePollutantData/';
+          url = '/api/rest/AtmosphereApi/Hour/GetHourSinglePollutantData/';
         } else if (params.dataType === 'day'  ) {
-          url = '/api/rest/Day/GetDaySinglePollutantData/';
+          url = '/api/rest/AtmosphereApi/Day/GetDaySinglePollutantData/';
         }
         const resultdata = await get(url, body, null);
         result=result.concat(resultdata.data);
@@ -66,13 +66,13 @@ export async function loadMonitorDatalist(params) {
   };
   let url = '';
   if (params.dataType === 'realtime') {
-    url = '/api/rest/RealTime/GetRealTimeData';
+    url = '/api/rest/AtmosphereApi/RealTime/GetRealTimeData';
   } else if (params.dataType === 'minute') {
-    url = '/api/rest/Minute/GetMinuteData';
+    url = '/api/rest/AtmosphereApi/Minute/GetMinuteData';
   } else if (params.dataType === 'hour'  ) {
-    url = '/api/rest/Hour/GetHourData';
+    url = '/api/rest/AtmosphereApi/Hour/GetHourData';
   } else if (params.dataType === 'day'  ) {
-    url = '/api/rest/Day/GetDayData';
+    url = '/api/rest/AtmosphereApi/Day/GetDayData';
   }
   const result = await post(url, body, null);
   return result;
@@ -121,7 +121,7 @@ export async function loadMonitoroverView(params) {
   } else if (params.monitortype === 'day') {
     body.dataType="DayData";
   }
-  url = '/api/rest/PointAndData/GetPointAllList';
+  url = '/api/rest/AtmosphereApi/PointAndData/GetPointAllList';
   const result = await post(url, body, null);
   return result;
 }
@@ -129,7 +129,7 @@ export async function loadPollutant(params) {
   const body = {
     pollutantTypes: params.pollutantType,
   };
-  const result = await post('/api/rest/Cod/GetPollutants', body, null);
+  const result = await post('/api/rest/AtmosphereApi/Cod/GetPollutants', body, null);
   return result;
 }
 export async function loadMonitorPoint(params) {
@@ -146,7 +146,7 @@ export async function loadPointDetail(params) {
     DGIMNs: params.dgimn,
     dataType:params.monitortype
   };
-  const result = await post('/api/rest/PointAndData/GetOnePoint', body, null);
+  const result = await post('/api/rest/AtmosphereApi/PointAndData/GetOnePoint', body, null);
   return result.data;
 }
 export async function loadCountryPointView(params) {
@@ -161,13 +161,13 @@ export async function loadCountryPointView(params) {
   let url;
   if (params.monitortype === 'minute') {
     body.dataType='MinuteData';
-    url = '/api/rest/PointAndData/GetPointAllList';
+    url = '/api/rest/AtmosphereApi/PointAndData/GetPointAllList';
   } else if (params.monitortype === 'hour') {
     body.dataType='HourData';
-    url = '/api/rest/PointAndData/GetPointAllList';
+    url = '/api/rest/AtmosphereApi/PointAndData/GetPointAllList';
   } else if (params.monitortype === 'day') {
     body.dataType='DayData';
-    url = '/api/rest/PointAndData/GetPointAllList';
+    url = '/api/rest/AtmosphereApi/PointAndData/GetPointAllList';
   }else{
     return null;
   }
