@@ -69,7 +69,7 @@ class MonitorDetail extends PureComponent {
       ...newstate,
     });
 
-   
+    
     this.props.dispatch({
       type: 'points/querypointdata',
       payload: {

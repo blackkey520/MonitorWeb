@@ -9,7 +9,8 @@ import FoldlineBar from '../Charts/foldline'
     data: points.data,
     pollutanttype: global.pollutanttype,
     countryArray:points.countryArray,
-    pointName:points.pointName
+    pointName:points.pointName,
+    levels:points.levels
 }))
 class LineChart extends Component {
     render() { 
@@ -20,7 +21,7 @@ class LineChart extends Component {
                 height: 'calc((100vh - 180px)/2',
                 backgroundColor:'#fff'
             }}>
-            <FoldlineBar dataType={this.props.dataType} pointName={this.props.pointName}  countryArray={this.props.countryArray}  data={this.props.data} />
+            <FoldlineBar dataType={this.props.dataType} pointName={this.props.pointName}  countryArray={this.props.countryArray}  data={this.props.data} levels={this.props.levels} />
             </div>
         );
     }

@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import { Chart, Axis, Tooltip, Geom,Legend } from 'bizcharts';
+import { Chart, Axis, Tooltip, Geom,Legend,Guide} from 'bizcharts';
 import moment from 'moment';
 import Debounce from 'lodash-decorators/debounce';
 import Bind from 'lodash-decorators/bind';
 import autoHeight from '../autoHeight';
 import styles from '../index.less';
 import DataSet from '@antv/data-set';
-
+const Line=Guide.Line;
 class FoldlineBar extends Component{
 
 render() {
@@ -22,15 +22,15 @@ render() {
       data=[{
         timeY:0,
       }] ,
-      countryArray
+      countryArray,
+      levels
     } = this.props;
-    
     let pointArray= [];
     pointArray.push(pointName);
     countryArray.map((item,key)=>{
       pointArray.push(item.label);
     })
-    console.log(pointName)
+
     let dataType=this.props.dataType
      
       data.map((item,key)=>{
@@ -98,8 +98,6 @@ render() {
           },
         };
  
-     
-    
         return (
           <div  style={{ height: height + 30 }}>
             <div>
@@ -109,6 +107,46 @@ render() {
                 <Tooltip />
                 <Legend name="key" position="top" />
                 <Geom type="line" position={'timeY*value'} size={borderWidth} color="key" />
+                <Geom type='point' position={'timeY*value'} size={4} shape={'circle'} style={{ stroke: '#fff', lineWidth: 1}} />
+                <Guide>
+                  {
+                    levels.map((item, key) => {
+                      let levelName='';
+                      switch (item.AlarmLevel) {
+                        case 1:
+                        levelName='一级报警';
+                        break;
+                        case 2:
+                        levelName='二级报警';
+                        break;
+                        case 3:
+                        levelName='三级报警';
+                        break;
+                        default:
+                        break;
+                      }
+                      return (<Line
+                        start={['min', item.UpperValue]}
+                        end={['max', item.UpperValue]}
+                        lineStyle={{
+                          stroke: item.StandardColor, // 线的颜色
+                          lineDash: [0, 2, 2], // 虚线的设置
+                          lineWidth: 1 // 线的宽度
+                        }} // 图形样式配置
+                        text={{
+                          position: 'end', // 文本的显示位置
+                          style: {
+                            fill: '#666', // 文本颜色
+                            fontSize: 13, // 文本大小
+                            fontWeight: 'bold' // 文本粗细
+                          }, // 文本图形样式配置 
+                          content: levelName, // 文本的内容
+                          offsetX: -30, // x 方向的偏移量
+                          offsetY: 20 // y 方向的偏移量
+                        }} />);
+                    })
+                  }
+                </Guide>
               </Chart>
             </div>
           </div>
