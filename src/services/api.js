@@ -74,6 +74,7 @@ export async function loadMonitorDatalist(params) {
   } else if (params.dataType === 'day'  ) {
     url = '/api/rest/AtmosphereApi/Day/GetDayData';
   }
+  
   const result = await post(url, body, null);
   return result;
 }
@@ -204,5 +205,14 @@ export async function queryLxSearchInfo(params) {
     isLx:params.isLx,
   };
   const result = await get('/api/rest/OutputAsPointApi/GetLxSearchResult', body, null);  
+  return result.data;
+}
+
+export async function GetAlarmLevelsByCode(params) {
+  const body = {  
+    DGIMN: params.DGIMN,
+    PollutantCode:params.PollutantCode,
+  };
+  const result = await post('/api/rest/AtmosphereApi/AlarmLevelApi/GetAlarmLevelList', body, null);
   return result.data;
 }

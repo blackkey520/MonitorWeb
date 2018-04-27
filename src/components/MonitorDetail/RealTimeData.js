@@ -1,10 +1,12 @@
 // import liraries
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import { Row, Col } from 'antd';
+import { Row, Col,Spin } from 'antd';
 import DataList from '../PointDetail/DataList';
 import LineChart from '../PointDetail/LineChart';
-
+@connect(({loading, monitor, global, points}) => ({
+  loading:loading.effects['points/querypointdata'],
+}))
 class RealTimeData extends Component {
   render() {
     return (
@@ -12,10 +14,12 @@ class RealTimeData extends Component {
         style={{ width: '100%',
       height: 'calc(100vh - 120px)', }}
       >
-        <Row gutter={8}>
-          <Col span={19} ><LineChart  dataType={this.props.dataType} /></Col>
-          <Col span={5} > <DataList /></Col>
-        </Row>
+        <Spin spinning={this.props.loading}>
+          <Row gutter={8}>
+            <Col span={19} ><LineChart  dataType={this.props.dataType} /></Col>
+            <Col span={5} > <DataList /></Col>
+          </Row>
+        </Spin>
       </div>
     );
   }

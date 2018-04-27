@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { loadMonitorPoint, loadLastdata, loadMonitorDatalist,maploadMonitorDatalist, loadPointDetail ,loadCountryMonitorDatalist} from '../services/api';
+import { loadMonitorPoint, loadLastdata, loadMonitorDatalist,maploadMonitorDatalist, loadPointDetail ,loadCountryMonitorDatalist,GetAlarmLevelsByCode} from '../services/api';
 import { Model } from '../dvapack';
 import { debug } from 'util';
 
@@ -103,9 +103,6 @@ export default Model.extend({
             current: 1, 
             dateformat: 'YYYY-MM-DD HH:mm:ss' },
         });
-        //获取报警级别
-        let levels=data.MonitorPointPollutant[0].Levels;
-        yield update({ levels });
     },
     //国控对比数据
     * querychartpointdata({
@@ -125,7 +122,7 @@ export default Model.extend({
            countryid=[];
            countryArray=[];
            columns= [{
-            title: '监控时间',
+            title: '监控时间',  
             dataIndex: 'MonitorTime',
             key: 'MonitorTime',
             width:180,
@@ -307,8 +304,7 @@ export default Model.extend({
            }
          }
          }
-         console.log(chartdata);
-         console.log(data);
+
          data.map((item,key)=>{
           chartdata.map((citem,ckey)=>{
             if(payload.monitortype=="hour")
@@ -334,7 +330,13 @@ export default Model.extend({
       const { size } = yield select(_ => _.points);
       const pointType=payload.pointType;
       const PollutantCode=payload.pollutant;
-    
+
+      const levels=yield call(GetAlarmLevelsByCode,{
+        PollutantCode: payload.pollutant,
+        DGIMN: payload.dgimn
+      });
+      yield update({ levels });
+
       const result = yield call(loadMonitorDatalist, { 
         PollutantCode: payload.pollutant,
         DGIMN: payload.dgimn,
@@ -345,6 +347,7 @@ export default Model.extend({
         dataType: payload.monitortype,
         pointType:payload.pointType,
       });
+      
       let resultdata = [];
       const resultda = [];
       if (result.data !== null)

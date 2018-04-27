@@ -1,15 +1,12 @@
 // import liraries
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import { Row, Col } from 'antd';
+import { Row, Col ,Spin} from 'antd';
 import DataList from '../PointDetail/DataList';
 import LineChart from '../PointDetail/LineChart';
 
 @connect(({ loading, monitor, global }) => ({
-  ...loading,
-  columns: monitor.columns,
-  data: monitor.data,
-  pollutanttype: global.pollutanttype,
+  loading:loading.effects['points/querypointdata'],
 }))
 class DayData extends Component {
   render() {
@@ -18,10 +15,12 @@ class DayData extends Component {
         style={{ width: '100%',
     height: 'calc(100vh - 120px)' }}
       >
+      <Spin spinning={this.props.loading}>
         <Row gutter={8}>
           <Col span={19} ><LineChart  dataType={this.props.dataType}/></Col>
           <Col span={5} > <DataList /></Col>
         </Row>
+        </Spin>
       </div>
     );
   }
