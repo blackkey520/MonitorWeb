@@ -34,7 +34,6 @@ export async function maploadMonitorDatalist(params)
           pageIndex: params.pageIndex,
           pageSize: params.pageSize,
           pointType:params.pointType,
-          New:""
         };
         if(params.PollutantCode)
         {
@@ -42,15 +41,15 @@ export async function maploadMonitorDatalist(params)
         }
         let url = '';
         if (params.dataType === 'realtime') {
-          url = '/api/rest/AtmosphereApi/RealTime/GetRealTimeData/';
+          url = '/api/rest/AtmosphereApi/RealTime/GetRealTimeData';
         } else if (params.dataType === 'minute') {
-          url = '/api/rest/AtmosphereApi/Minute/GetMinuteData/';
+          url = '/api/rest/AtmosphereApi/Minute/GetMinuteData';
         } else if (params.dataType === 'hour'  ) {
-          url = '/api/rest/AtmosphereApi/Hour/GetHourSinglePollutantData/';
+          url = '/api/rest/AtmosphereApi/Hour/GetHourData';
         } else if (params.dataType === 'day'  ) {
-          url = '/api/rest/AtmosphereApi/Day/GetDaySinglePollutantData/';
+          url = '/api/rest/AtmosphereApi/Day/GetDayData';
         }
-        const resultdata = await get(url, body, null);
+        const resultdata = await post(url, body, null);
         result=result.concat(resultdata.data);
       }
         return result;
@@ -63,6 +62,7 @@ export async function loadMonitorDatalist(params) {
     EndTime: params.EndTime,
     pageIndex: params.pageIndex,
     pageSize: params.pageSize,
+    pollutantCodes:params.PollutantCode
   };
   let url = '';
   if (params.dataType === 'realtime') {
@@ -74,6 +74,7 @@ export async function loadMonitorDatalist(params) {
   } else if (params.dataType === 'day'  ) {
     url = '/api/rest/AtmosphereApi/Day/GetDayData';
   }
+  
   const result = await post(url, body, null);
   return result;
 }
@@ -222,5 +223,14 @@ export async function queryLxSearchInfo(params) {
     isLx:params.isLx,
   };
   const result = await get('/api/rest/OutputAsPointApi/GetLxSearchResult', body, null);  
+  return result.data;
+}
+
+export async function GetAlarmLevelsByCode(params) {
+  const body = {  
+    DGIMN: params.DGIMN,
+    PollutantCode:params.PollutantCode,
+  };
+  const result = await post('/api/rest/AtmosphereApi/AlarmLevelApi/GetAlarmLevelList', body, null);
   return result.data;
 }

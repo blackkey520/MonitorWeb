@@ -116,7 +116,7 @@ export default Model.extend({
             GroupID.push(item.groupID);
           }
           payload.GroupID=GroupID;
-          
+          console.log(payload.GroupID);
         });
      
         //国控数据加载

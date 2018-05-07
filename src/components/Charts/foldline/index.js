@@ -86,7 +86,6 @@ render() {
     
         const timeScale = {
           tickCount: 15,
-          range: [0, 1],
         };
     
         const cols = {
@@ -104,22 +103,31 @@ render() {
               <Chart height={height} padding={padding} data={dv} scale={cols} forceFit>
                 <Axis name="timeY" />
                 <Tooltip />
-                <Legend name="key" position="top" />
+                <Legend name="key" position="top"/>
                 <Geom type="line" position={'timeY*value'} size={borderWidth} color="key" />
                 <Geom type='point' position={'timeY*value'} size={4} shape={'circle'} style={{ stroke: '#fff', lineWidth: 1}} />
                 <Guide>
                   {
+                 
                     levels.map((item, key) => {
                       let levelName='';
+                      let textColor='#666';
                       switch (item.AlarmLevel) {
                         case 1:
                         levelName='一级报警';
+                        textColor=item.StandardColor;
                         break;
                         case 2:
                         levelName='二级报警';
+                        textColor=item.StandardColor;
                         break;
                         case 3:
                         levelName='三级报警';
+                        textColor=item.StandardColor;
+                        break;
+                        case 4:
+                        levelName='四级报警';
+                        textColor=item.StandardColor;
                         break;
                         default:
                         break;
@@ -130,12 +138,12 @@ render() {
                         lineStyle={{
                           stroke: item.StandardColor, // 线的颜色
                           lineDash: [0, 2, 2], // 虚线的设置
-                          lineWidth: 1 // 线的宽度
+                          lineWidth: 2 // 线的宽度
                         }} // 图形样式配置
                         text={{
                           position: 'end', // 文本的显示位置
                           style: {
-                            fill: '#666', // 文本颜色
+                            fill: textColor, // 文本颜色
                             fontSize: 13, // 文本大小
                             fontWeight: 'bold' // 文本粗细
                           }, // 文本图形样式配置 

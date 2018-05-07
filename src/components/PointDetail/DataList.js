@@ -25,7 +25,7 @@ class DataList extends Component {
       this.props.dispatch({
         type: 'points/querypointdata',
         payload: {
-          dgimn: this.props.selpoint.Point.Dgimn,
+          dgimn: this.props.selpoint.DGIMN,
           current: this.props.current + 1,
           querydate: this.props.querydate,
           monitortype: this.props.monitortype,

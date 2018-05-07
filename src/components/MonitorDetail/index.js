@@ -23,13 +23,12 @@ const RangePicker = DatePicker.RangePicker;
   selpoint: points.selpoint,
   isfinished:points.isfinished,
   current: points.current,
-  countryPointInfo:monitor.CouontryInfo.data
+  countryPointInfo:monitor.CouontryInfo
 }))
 class MonitorDetail extends PureComponent {
   constructor(props) {
     super(props);
     this.menus = props.menuData;
-    console.log(props.selpoint.pollutantList[0].pollutantCode)
     this.state = { 
       monitortype: 'realtime',
       dateformat: 'YYYY-MM-DD HH:mm:ss',
@@ -74,7 +73,7 @@ class MonitorDetail extends PureComponent {
     this.props.dispatch({
       type: 'points/querypointdata',
       payload: {
-        dgimn: this.props.selpoint.Point.Dgimn,
+        dgimn: this.props.selpoint.DGIMN,
         current: 1,
         ...newstate,
         pollutant: this.state.pollutant,
@@ -87,6 +86,7 @@ class MonitorDetail extends PureComponent {
     });
   }
   onDateOK=() => {
+ 
     this.props.dispatch({
       type: 'points/querypointdata',
       payload: {
@@ -102,7 +102,7 @@ class MonitorDetail extends PureComponent {
     this.setState({
       pollutant: value,
     });
-    
+ 
     this.props.dispatch({
       type: 'points/querypointdata',
       payload: {
@@ -128,7 +128,7 @@ class MonitorDetail extends PureComponent {
         type: 'points/querychartpointdata',
         payload: {
           ...this.state,
-          dgimn: this.props.selpoint.Point.Dgimn,
+          dgimn: this.props.selpoint.DGIMN,
           current: 1,
           countrydgimn:value,
         },
@@ -142,7 +142,6 @@ class MonitorDetail extends PureComponent {
     })
   }
   render() {
-
     const { selpoint, effects ,countryPointInfo} = this.props;
     return (
       <div
@@ -159,7 +158,7 @@ class MonitorDetail extends PureComponent {
                   value={this.state.countryPointInfo} style={{ width: 500 }} onChange={this.onCountryChange} labelInValue={true}   placeholder="请选择对比国控点">
                   {
                       countryPointInfo.map((item, key) => {
-                        return <Option key={key} value={item.DGIMN}>{item.text}</Option>;
+                        return <Option key={key} value={item.DGIMN}>{item.pointName}</Option>;
                       })
                     }
                   </ Select>: 

@@ -6,10 +6,7 @@ import DataList from '../PointDetail/DataList';
 import LineChart from '../PointDetail/LineChart';
 
 @connect(({ loading, monitor, global }) => ({
-  ...loading,
-  columns: monitor.columns,
-  data: monitor.data,
-  pollutanttype: global.pollutanttype,
+  loading:loading.effects['points/querypointdata'],
 }))
 class HourData extends Component {
   render() {
@@ -19,13 +16,12 @@ class HourData extends Component {
         style={{ width: '100%',
       height: 'calc(100vh - 120px)', }}
       >
-
-         {effects['points/querychartpointdata']?<Spin style={{width: '100%',
-        height: 'calc(100vh - 260px)',marginTop:260 }} size="large" />:
+         <Spin spinning={this.props.loading}>
         <Row gutter={8}>
           <Col span={19} ><LineChart  dataType={this.props.dataType}/></Col>
           <Col span={5} > <DataList /></Col>
-        </Row> }
+        </Row> 
+        </Spin>
       </div>
     );
   }

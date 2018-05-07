@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { loadMonitorPoint, loadLastdata, loadMonitorDatalist,maploadMonitorDatalist, loadPointDetail ,loadCountryMonitorDatalist} from '../services/api';
+import { loadMonitorPoint, loadLastdata, loadMonitorDatalist,maploadMonitorDatalist, loadPointDetail ,loadCountryMonitorDatalist,GetAlarmLevelsByCode} from '../services/api';
 import { Model } from '../dvapack';
 import { debug } from 'util';
 
@@ -96,22 +96,18 @@ export default Model.extend({
           type: 'querypointdata',
           payload: { 
             dgimn: payload.DGIMN, 
-            pollutant: data.pollutantType, 
+            pollutant: data[0].pollutantList[0].pollutantCode, 
             querydate:  payload.pointType=="monitorData"?[moment().add(-30, 'm'), moment()]:[moment().add(-24, 'h'), moment()],
             monitortype: payload.pointType=="monitorData"?"realtime":"hour",
             pointType:payload.pointType,
             current: 1, 
             dateformat: 'YYYY-MM-DD HH:mm:ss' },
         });
-        //获取报警级别
-        let levels=data.MonitorPointPollutant[0].Levels;
-        yield update({ levels });
     },
     //国控对比数据
     * querychartpointdata({
          payload,
      }, { call, update, put, select }) {
-        
          yield update({isfinished:true});
          const { size } = yield select(_ => _.points);
          let { chartdata } = yield select(_ => _.points);
@@ -126,7 +122,7 @@ export default Model.extend({
            countryid=[];
            countryArray=[];
            columns= [{
-            title: '监控时间',
+            title: '监控时间',  
             dataIndex: 'MonitorTime',
             key: 'MonitorTime',
             width:180,
@@ -137,12 +133,10 @@ export default Model.extend({
             dataIndex: 'MonitorValue',
             key: 'MonitorValue',
             width:100,
-           
             render: (text, record) => (
               <div style={{ color: record.color} }>{text}</div>
             ),
           }];
-       
           let allcountrydata=[];
           payload.countrydgimn.map((item,key)=>{
             countryArray.push(item);
@@ -154,7 +148,6 @@ export default Model.extend({
              })
              mnlist.push(item.key);
           });
-         
           const result = yield call(maploadMonitorDatalist, { 
             PollutantCode: payload.pollutant,
             BeginTime: payload.querydate[0].format(payload.dateformat),
@@ -165,14 +158,13 @@ export default Model.extend({
             pointType:payload.pointType,
             mnlist:mnlist
           });
-         
           if(result!=null)
           {
             allcountrydata= allcountrydata.concat(result);
           }
           allcountrydata.map((item,key)=>{
               const existdata = chartdata.find((value, index, arr) => {
-                return value.MonitorTime==item.MonitorTime && value.DGIMN==item.DGIMN;
+                return value.MonitorTime==item.MonitorTime && value.DataGatherCode==item.DataGatherCode;
               })
               if(!existdata)
               {
@@ -263,7 +255,6 @@ export default Model.extend({
            pointType:payload.pointType,
          });
 
-         console.log(result);
          if(!payload.isclear)
          {
            const resultdata = yield call(loadMonitorDatalist, { 
@@ -283,19 +274,20 @@ export default Model.extend({
                if (payload.monitortype === 'realtime')
                {
                  resultda.push(item);
+                 item.MonitorValue = item[payload.pollutant];
                } else if (payload.monitortype === 'minute')
                {
-                 item.MonitorValue = item.AvgValue;
+                 item.MonitorValue = item[payload.pollutant];
                  resultda.push(item);
                } else if (payload.monitortype === 'hour' )
                {
-                 item.MonitorValue = item.AvgValue;
+                 item.MonitorValue = item[payload.pollutant];
                  item.MonitorTime = moment(item.MonitorTime).format('YYYY-MM-DD HH');
                  resultda.push(item);
                }
                else if (payload.monitortype === 'day' )
                {
-                 item.MonitorValue = item.AvgValue;
+                 item.MonitorValue = item[payload.pollutant];
                  item.MonitorTime = moment(item.MonitorTime).format('YYYY-MM-DD');
                  resultda.push(item);
                }
@@ -312,20 +304,20 @@ export default Model.extend({
            }
          }
          }
-     
+
          data.map((item,key)=>{
           chartdata.map((citem,ckey)=>{
             if(payload.monitortype=="hour")
             {
               if(item.MonitorTime == moment(citem.MonitorTime).format('YYYY-MM-DD HH'))
               {
-                item[citem.DGIMN]=citem.AvgValue;
+                item[citem.DataGatherCode]=citem[payload.pollutant];
               }
             }
             else{
               if(item.MonitorTime == moment(citem.MonitorTime).format('YYYY-MM-DD'))
               {
-                item[citem.DGIMN]=citem.AvgValue;
+                item[citem.DataGatherCode]=citem[payload.pollutant];
               }
             }
           })
@@ -338,8 +330,13 @@ export default Model.extend({
       const { size } = yield select(_ => _.points);
       const pointType=payload.pointType;
       const PollutantCode=payload.pollutant;
-      debugger;
-      console.log(PollutantCode);
+
+      const levels=yield call(GetAlarmLevelsByCode,{
+        PollutantCode: payload.pollutant,
+        DGIMN: payload.dgimn
+      });
+      yield update({ levels });
+
       const result = yield call(loadMonitorDatalist, { 
         PollutantCode: payload.pollutant,
         DGIMN: payload.dgimn,
@@ -350,14 +347,12 @@ export default Model.extend({
         dataType: payload.monitortype,
         pointType:payload.pointType,
       });
+      
       let resultdata = [];
       const resultda = [];
       if (result.data !== null)
       {
-
-        
         result.data.map((item, key) => {
-          debugger;
           if (payload.monitortype === 'realtime')
           {
             item.MonitorValue = item[PollutantCode];

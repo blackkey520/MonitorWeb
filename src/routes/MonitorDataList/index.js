@@ -160,7 +160,6 @@ class MonitorDataList extends Component {
             bodyStyle={{ height: 'calc(100vh - 300px)' }}
             onRow={record => ({
               onClick: () => {
-                debugger;
                 this.setState({
                     showdetail:true,
                     countryshowdetail:false
