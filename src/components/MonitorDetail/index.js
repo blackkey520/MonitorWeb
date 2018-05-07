@@ -29,7 +29,6 @@ class MonitorDetail extends PureComponent {
   constructor(props) {
     super(props);
     this.menus = props.menuData;
-    debugger;
     console.log(props.selpoint.pollutantList[0].pollutantCode)
     this.state = { 
       monitortype: 'realtime',

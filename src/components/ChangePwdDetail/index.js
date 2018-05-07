@@ -20,23 +20,15 @@ if (response) {
 }
 
 @connect(({user,loading}) => ({
-  isload:loading.effects['user/changepwd'],
-}))
-@Form.create()
+  loading:loading.effects['user/changepwd']}),null,null,{withRef:true})
+@Form.create({ withRef: true})
 class ChangePwdDetail extends PureComponent {  
   constructor(props) {
     super(props);
     this.state = {
-      confirmDirty: false,      
-      showchangepwd:false
+      confirmDirty: false,
+      isshow:false
     }
-  }
-  componentDidMount() {
-    this.props.onRef(this)
-  }
-  modifyshowchangepwd = () => {
-    let showchangepwd = { showchangepwd: true };
-    this.setState(showchangepwd);
   }
   sleep = (numberMillis) => {
     var now = new Date();
@@ -72,14 +64,6 @@ class ChangePwdDetail extends PureComponent {
     const confirmDirty = this.state.confirmDirty || !!value;
     this.setState({ confirmDirty: confirmDirty });
   }
-  // validateToOldPassword= (rule, value, callback) => {
-  //   if (this.changepwd() == 0) {
-  //     message.info('旧密码输入错误!');
-  //     // callback('旧密码输入错误!');
-  //   } else {
-  //     // callback();
-  //   }
-  // }
   validateToNextPassword = (rule, value, callback) => {
     const form = this.props.form;
     if (value && this.state.confirmDirty) {
@@ -94,6 +78,11 @@ class ChangePwdDetail extends PureComponent {
     } else {
       callback();
     }
+  }
+  showwindow=(isshowwindow)=>{
+    this.setState({
+      isshow:isshowwindow
+    });
   }
   render() {
     const formItemLayout = {
@@ -114,23 +103,23 @@ class ChangePwdDetail extends PureComponent {
     return (      
       <Modal
         title='修改密码'
-        visible={this.state.showchangepwd}
+        visible={this.state.isshow}
         width={SCREEN_WIDTH * 0.45}
         wrapClassName="vertical-center-modal"
         onCancel={() => {
           this.setState({
-            showchangepwd: false
+            isshow:false
           });
         }}
         onOk={this.handleSubmit}
       >
-      <Spin spinning={this.props.isload}>
+      <Spin spinning={this.props.loading}>
       <Form onSubmit={this.handleSubmit}>
         <FormItem
           {...formItemLayout}
           label="账户"
         >
-              <label value={user == null ? '' : `${user.User_Name}(${user.User_Account})`}>{user == null ? '' : `${user.User_Name}(${user.User_Account})`}</label>
+        <label value={user == null ? '' : `${user.User_Name}(${user.User_Account})`}>{user == null ? '' : `${user.User_Name}(${user.User_Account})`}</label>
         </FormItem>
         <FormItem
           {...formItemLayout}

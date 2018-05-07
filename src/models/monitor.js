@@ -111,7 +111,6 @@ export default Model.extend({
             }
           });
           dataitem.key = key + 1;
-          console.log(dataitem);
           data.push(dataitem);
           if(GroupID.indexOf(item.groupID)==-1&&item.groupID!=null){
             GroupID.push(item.groupID);

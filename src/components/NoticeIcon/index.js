@@ -22,10 +22,17 @@ export default class NoticeIcon extends PureComponent {
   static Tab = TabPane;
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      noticevisible:false,
+    };
     if (props.children && props.children[0]) {
       this.state.tabType = props.children[0].props.title;
     }
+  }
+  close=(visible)=>{
+    this.setState({
+      noticevisible:visible
+    });
   }
   onItemClick = (item, tabProps) => {
     const { onItemClick } = this.props;
@@ -92,7 +99,7 @@ export default class NoticeIcon extends PureComponent {
         arrowPointAtCenter
         popupAlign={popupAlign}
         onVisibleChange={onPopupVisibleChange}
-        {...popoverProps}
+        visible={this.state.noticevisible}
       >
         {trigger}
       </Popover>

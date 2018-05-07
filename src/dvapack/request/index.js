@@ -56,7 +56,7 @@ async function request(url, _options) {
   const resp = await fetch(url, options);
   console.log(`status${resp.status}`);
   const text = await resp.text();
-  console.log('RESP:', text);
+  // console.log('RESP:', text);
   try {
     const json = await JSON.parse(text); 
     // 如果请求失败
@@ -127,7 +127,7 @@ export async function upload(url, body, optionscall, tooken) {
 
   const text = await resp.text();
 
-  console.log('RESP:', text);
+  // console.log('RESP:', text);
 
   const json = JSON.parse(text);
 

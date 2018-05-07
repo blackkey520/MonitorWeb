@@ -10,6 +10,7 @@ export default {
     loading: false,
     currentUser: {},
     changepwdRes:"",
+    isshowDetail:false,
   },
 
   effects: {
@@ -63,7 +64,6 @@ export default {
       }
     },
   },
-
   reducers: {
     save(state, action) {
       return {
@@ -98,6 +98,10 @@ export default {
         changepwdRes: action.payload,
       };
     },
-
+    changeshowDetail(action) {
+      return {
+        isshowDetail: action.payload,
+      };
+    },
   },
 };

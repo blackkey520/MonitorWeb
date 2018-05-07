@@ -37,17 +37,23 @@ export default class MonitorHeader extends PureComponent {
     this.menus = props.menuData;
     this.state = {
       openKeys: this.getDefaultCollapsedSubMenus(props),
-      showdetail:false,
-      detailtitle:"",
-      alarmTime:0,
-      DGIMN:"",
-      datetime:null,
-      oldvalue:""
+      showdetail: false,
+      detailtitle: "",
+      alarmTime: 0,
+      DGIMN: "",
+      datetime: null,
+      oldvalue: ""
     };
   }
   componentDidMount() {
     this.props.dispatch({
       type: 'user/fetchCurrent',
+    });
+    
+    //初始化header的时候调用一下notice事件，显示报警信息
+    this.props.dispatch({
+      type: 'global/getNotifyCount',
+      payload:{}
     });
   }
   componentWillReceiveProps(nextProps) {
@@ -241,6 +247,7 @@ export default class MonitorHeader extends PureComponent {
       openKeys: isMainMenu ? [lastOpenKey] : [...openKeys],
     });
   }
+ 
 handleMenuClick = ({ key }) => {
   switch (key) {
     case 'logout':
@@ -249,22 +256,18 @@ handleMenuClick = ({ key }) => {
       });
       break;
     case 'changepwd':
-      this.child.modifyshowchangepwd();
+      this._changepwd.wrappedInstance.refs.wrappedComponent.showwindow(true);
       break;
     default:
       break;
   }  
 }
-onRef = (ref) => {
-  this.child = ref
-}
 handleNoticeVisibleChange = (visible) => {
+  this.Popover.close(visible);
   if (visible) {
     this.props.dispatch({
       type: 'global/fetchNotices',
-      payload:{
-        
-      }
+      payload:{}
     });
   }
 }
@@ -292,8 +295,13 @@ onChange=(value)=>{
     }
   }, 1000);
 }
-
-
+modifymsgDetailStateData=(DGIMN,datenow)=>{
+  // console.log(this._MessageDetail);
+  this._MessageDetail.modifyMessageDetailStateData(DGIMN,datenow);
+}
+transfershowdetail=(showdetail)=>{
+  this.setState(showdetail);
+}
 render() {
   const {
     currentUser, fetchingNotices,
@@ -306,7 +314,9 @@ render() {
 
   const { openKeys } = this.state;
   const menu = (
-    <Menu className={styles.menu} selectedKeys={[]} onClick={this.handleMenuClick}>
+    <Menu className={styles.menu} selectedKeys={[]} onClick={(param)=>{
+      this.handleMenuClick(param);
+    }}>
       <Menu.Item disabled><Icon type="user" />个人中心</Menu.Item>
       <Menu.Item key="changepwd"><Icon type="edit" />修改密码</Menu.Item>
       <Menu.Divider />
@@ -318,9 +328,6 @@ render() {
   if (!selectedKeys.length) {
     selectedKeys = [openKeys[openKeys.length - 1]];
   }
-
-
-  
   return (
     <Header className={styles.header}>
       <div className={styles.logo}>
@@ -329,9 +336,9 @@ render() {
       </div>
       <div className={styles.right}>
         <HeaderSearch
-          className={`${styles.action} ${styles.search}`}
           placeholder="站内搜索"
           dataSource={this.props.lxsearchinfo}
+          className={`${styles.action} ${styles.search}`}
           onSearch={ this.onSearch }
           onChange={this.onChange }
           onPressEnter={this.onPressEnter}
@@ -339,20 +346,22 @@ render() {
         <NoticeIcon
           className={styles.action}
           count={currentUser.notifyCount}
-          onItemClick={(item, tabProps) => {           
+          onItemClick={(item, tabProps) => {
+            this.Popover.close(false);
             this.setState({
-              showdetail:true,
-              detailtitle:item.parentname+"-"+item.pointname,
-              DGIMN:item.DGIMN,
-              datetime:item.datetime,
-              datenow:item.datenow
+              showdetail: true,
+              detailtitle: item.parentname + "-" + item.pointname,
+              DGIMN: item.DGIMN,
+              datetime: item.datetime,
+              datenow: item.datenow
             });
-
+            this.modifymsgDetailStateData(item.DGIMN,item.datenow);
             // console.log(item, tabProps); // eslint-disable-line
           }}          
           onPopupVisibleChange={this.handleNoticeVisibleChange}
           loading={fetchingNotices}
           popupAlign={{ offset: [20, -16] }}
+          ref={(ref) => { this.Popover = ref; }}
           >
           <NoticeIcon.Tab
             list={noticeData['报警']}
@@ -387,23 +396,10 @@ render() {
       </Menu>
 
       
-      <Modal
-      title={this.state.detailtitle !== null ? `${this.state.detailtitle }` : '详细信息'}
-      visible={this.state.showdetail}
-      //wrapClassName={styles["vertical-center-modal"]}
-      width={SCREEN_WIDTH*0.45}     
-      onCancel={() => {
-        this.setState({
-          showdetail:false
-        });
-      }}
-      footer={null}
-    >
-      <MessageDetail changeModel={this.changeModelheight} {...this.props} {...this.state}/>
-    </Modal>
 
+      <MessageDetail {...this.state} ref={(ref) => {this._MessageDetail = ref;}} transfershowdetail = {msg => this.transfershowdetail(msg)} />    
 
-    <ChangePwdDetail {...this.props} onRef={this.onRef} />
+      <ChangePwdDetail  ref={(ref) => { this._changepwd = ref; }}  />
     
     </Header>
   );

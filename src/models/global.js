@@ -20,14 +20,13 @@ export default Model.extend({
       yield update({ pollutanttype });
     },
     *fetchNotices({payload}, { call, put }) {
-       
       yield put({
         type: 'changeNoticeLoading',
         payload: true,
-      });
+      });      
       let today = getTimeDistance("today");
 
-      payload.time=today;
+      payload.time = today;
       const res = yield call(getAllPointAlarmInfo,payload);
 
        let data=[];
@@ -36,26 +35,44 @@ export default Model.extend({
          if (res.data) {           
             res.data.map(elem=>{
               data.push({
-              id:elem.DGIMN,
+              id:elem.dgimn,
               avatar:'https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png',
-              title:elem.PointName+"报警"+elem.Count+"次",
-              parentname:elem.ParentName,
-              pointname:elem.PointName,
-              datetime:elem.DateNow,
-              alarmTime:elem.AlarmTime,
-              DGIMN:elem.DGIMN,
-              datenow:elem.DateNow,
+              title:elem.parentName+"报警"+elem.count+"次",
+              parentname:elem.parentName,
+              pointname:elem.pointName,
+              datetime:elem.dateNow,
+              alarmTime:elem.alarmTime,
+              DGIMN:elem.dgimn,
+              datenow:elem.dateNow,
               type: '报警'
               });
-              count+=elem.Count;
+              count+=elem.count;
             });
          }
       }
-
       yield put({
         type: 'saveNotices',
         payload: data,
       });
+      yield put({
+        type: 'user/changeNotifyCount',
+        payload: count,
+      });
+    },
+    *getNotifyCount({ payload }, { put, call }) {
+      let today = getTimeDistance("today");
+      payload.time = today;
+      const res = yield call(getAllPointAlarmInfo,payload);
+
+       let data=[];
+       let count=0;
+       if(res){
+         if (res.data) {           
+            res.data.map(elem=>{
+              count+=elem.count;
+            });
+         }
+      }
       yield put({
         type: 'user/changeNotifyCount',
         payload: count,
@@ -75,9 +92,9 @@ export default Model.extend({
     *saveFeed({payload}, {put, call, select}) {
       const {data} = payload;
       // console.log('data152:' + JSON.stringify(data))
-      // yield put({type: 'fetchNotices', payload: {
-      //     data
-      // }});
+      yield put({type: 'fetchNotices', payload: {
+          data
+      }});
     }
   },
 
@@ -110,13 +127,13 @@ export default Model.extend({
   },
 
   subscriptions: {
-    // feedSubscriber({dispatch}) {
-    //   return service.listen((data) => {
-    //     dispatch({type: 'saveFeed', payload: {
-    //         data
-    //       }});
-    //   });
-    // },
+    feedSubscriber({dispatch}) {
+      return service.listen((data) => {
+        dispatch({type: 'saveFeed', payload: {
+            data
+          }});
+      });
+    },
   //   socket({dispatch}){ // socket相关
   //     return service.listen(data => {
   //         switch (data.type) {

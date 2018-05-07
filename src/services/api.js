@@ -177,24 +177,42 @@ export async function loadCountryPointView(params) {
 
 
 export async function getAllPointAlarmInfo(params) {
-  const body = {
-    time: params.time,
-  };
-  // const result = await get('/api/rest/AlarmDealInfoApi/GetAllPointExceptionInfo', body, null);
-  const result = await get('/api/rest/AtmosphereApi/AlarmData/GetAlarmToVerifyList', body, null);
-  
+  let result = null;
+  let body = {
+    pollutantTypes: "18",
+    pageSize: 10000,
+    pageIndex: 1
+  }
+  //获取所有点位
+  const mns = await post('/api/rest/AtmosphereApi/PointAndData/GetPointList', body, null);
+  let strmns = "";
+  if (mns) {
+    if (mns.data) {
+      mns.data.map(x => {
+        strmns += "," + x.DGIMN;
+      });
+    }
+    if (strmns) {
+      body = {
+        DGIMNs: strmns,
+        time: params.time,
+      };
+      // const result = await get('/api/rest/AlarmDealInfoApi/GetAllPointExceptionInfo', body, null);
+      result = await post('/api/rest/AtmosphereApi/AlarmData/GetAlarmToVerifyList', body, null);      
+    }
+  }
   return result === null ? { data: null } : result;
 }
 
-export async function getAllExceptionInfo(params) {
+export async function GetAlarmHistoryList(params) {
   const body = {
-    dgimn: params.dgimn,
-    starttime:params.starttime,
-    endtime:params.endtime,
-    pageindex:params.pageindex,
-    pagesize:params.pagesize,
+    DGIMN: params.DGIMN,
+    beginTime: params.beginTime,
+    endTime: params.endTime,
+    pageindex: params.pageindex,
+    pagesize: params.pagesize,
   };
-  const result = await get('/api/rest/AlarmDealInfoApi/GetAllExceptionInfo', body, null);  
+  const result = await post('/api/rest/AtmosphereApi/AlarmData/GetAlarmHistoryList', body, null);  
   return result === null ? { data: null } : result;
 }
 
