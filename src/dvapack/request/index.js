@@ -56,11 +56,7 @@ async function request(url, _options) {
   const resp = await fetch(url, options);
   console.log(`status${resp.status}`);
   const text = await resp.text();
-<<<<<<< HEAD
   // console.log('RESP:', text);
-=======
-  console.log('RESP:', text);``
->>>>>>> efd20c58973f7a6c9b4b4415484bffe9e1eb4836
   try {
     const json = await JSON.parse(text); 
     // 如果请求失败
