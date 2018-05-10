@@ -20,14 +20,16 @@ if (response) {
 }
 
 @connect(({user,loading}) => ({
-  loading:loading.effects['user/changepwd']}),null,null,{withRef:true})
+  loading: loading.effects['user/fetchchangepwd'],
+  effects: loading.effects
+}),null,null,{withRef:true})
 @Form.create({ withRef: true})
 class ChangePwdDetail extends PureComponent {  
   constructor(props) {
     super(props);
     this.state = {
       confirmDirty: false,
-      isshow:false
+      isshow: false
     }
   }
   sleep = (numberMillis) => {
@@ -54,7 +56,7 @@ class ChangePwdDetail extends PureComponent {
     const confirm=form.getFieldValue('confirm');
     
     this.props.dispatch({
-      type: 'user/changepwd',
+      type: 'user/fetchchangepwd',
       payload: {oldpassword,password,confirm},
     }); 
       
@@ -99,7 +101,8 @@ class ChangePwdDetail extends PureComponent {
     
     const SCREEN_HEIGHT = document.querySelector('body').offsetHeight;
     const SCREEN_WIDTH = document.querySelector('body').offsetWidth;
-
+    const loading=this.props.loading==undefined?false:this.props.loading;
+debugger;
     return (      
       <Modal
         title='修改密码'
@@ -113,7 +116,7 @@ class ChangePwdDetail extends PureComponent {
         }}
         onOk={this.handleSubmit}
       >
-      <Spin spinning={this.props.loading}>
+      <Spin spinning={loading}>
       <Form onSubmit={this.handleSubmit}>
         <FormItem
           {...formItemLayout}

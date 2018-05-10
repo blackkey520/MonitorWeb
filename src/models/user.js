@@ -40,7 +40,7 @@ export default {
         });
       }
     },
-    *changepwd({ payload }, { call, put,update,select }) {
+    *fetchchangepwd({ payload }, { call, put,update,select }) {
       const response = Cookie.get('token');
       if (response) {
         const user = JSON.parse(response);
