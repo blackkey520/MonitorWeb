@@ -32,7 +32,7 @@ class MessageDetail extends PureComponent {
       data: [],
       modalHeight: SCREEN_HEIGHT * 0.6,
       pageindex: 1,
-      pagesize: 1
+      pagesize: 5
     }
   }
   modifyMessageDetailStateData = (DGIMN, datenow) => {

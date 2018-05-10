@@ -8,6 +8,7 @@ import RealTimeData from './RealTimeData';
 import MinuteData from './MinuteData';
 import HourData from './HourData';
 import DayData from './DayData';
+import AlarmData from './AlarmData';
 import {delay} from '../../utils/utils'
 import { debug } from 'util';
  
@@ -18,12 +19,13 @@ const { TabPane } = Tabs;
 const Option = Select.Option;
 
 const RangePicker = DatePicker.RangePicker;
-@connect(({ loading, points ,monitor,countrypoints}) => ({
+@connect(({ loading, points ,monitor,countrypoints,alarm}) => ({
   ...loading,
   selpoint: points.selpoint,
   isfinished:points.isfinished,
   current: points.current,
-  countryPointInfo:monitor.CouontryInfo
+  countryPointInfo:monitor.CouontryInfo,
+  size:alarm.size
 }))
 class MonitorDetail extends PureComponent {
   constructor(props) {
@@ -37,68 +39,111 @@ class MonitorDetail extends PureComponent {
       countryPointInfo:[],
       countrydgimn:'',
       PointName: props.selpoint.pointName,
-      countrylength:0
+      countrylength: 0,
+      alarmquerydate: [moment(moment().format('YYYY-MM-DD 00:00:00')), moment()],
+      verfystate: ""
     };
      
   }
   onChange=(key) => {
     const newstate = {};
-    
+    let isalarm=false;
     if (key === 'realtime')
     {
       newstate.PointName=this.state.PointName;
       newstate.monitortype = key;
       newstate.querydate = [moment().add(-30, 'm'), moment()];
       newstate.dateformat = 'YYYY-MM-DD HH:mm:ss';
+      isalarm=true;
     } else if (key === 'minute') {
       newstate.monitortype = key;
       newstate.querydate = [moment().add(-12, 'h'), moment()];
       newstate.dateformat = 'YYYY-MM-DD HH:mm:00';
+      isalarm=true;
     } else if (key === 'hour')
     {
       newstate.monitortype = key;
       newstate.querydate = [moment().add(-24, 'h'), moment()];
       newstate.dateformat = 'YYYY-MM-DD HH:00:00';
+      isalarm=true;
     } else if (key === 'day')
     {
       newstate.monitortype = key;
       newstate.querydate = [moment().add(-1, 'M'), moment()];
       newstate.dateformat = 'YYYY-MM-DD 00:00:00';
+      isalarm=true;
     }
-    this.setState({
-      ...newstate,
-    });
+    else if(key==="alarm"){      
+      this.setState({
+        monitortype: key,
+      });
+      this.props.dispatch({
+        type: 'alarm/getAlarmHistoryList',
+        payload: {
+          querydate: [moment().format('YYYY-MM-DD 00:00:00'), moment().format('YYYY-MM-DD HH:mm:ss')],
+          dgimn: this.props.selpoint.DGIMN,
+          pageindex: 1,
+          current: 1,
+          beginTime: moment().format('YYYY-MM-DD 00:00:00'),
+          endTime:moment().format('YYYY-MM-DD HH:mm:ss'),
+          pagesize:this.props.size
+        },
+      });
+    }
 
-    
-    this.props.dispatch({
-      type: 'points/querypointdata',
-      payload: {
-        dgimn: this.props.selpoint.DGIMN,
-        current: 1,
+    if (isalarm) {
+      this.setState({
         ...newstate,
-        pollutant: this.state.pollutant,
-      },
-    });
+      });
+      this.props.dispatch({
+        type: 'points/querypointdata',
+        payload: {
+          dgimn: this.props.selpoint.DGIMN,
+          current: 1,
+          ...newstate,
+          pollutant: this.state.pollutant,
+        },
+      });
+    }
   }
   onDateChange=(dates, dateStrings) => {
-    this.setState({
-      querydate: dates,
-    });
+    if (this.state.monitortype != "alarm") {
+      this.setState({
+        querydate: dates,
+      });
+    } else {
+      this.setState({
+        alarmquerydate: dates,
+      });
+    }
   }
-  onDateOK=() => {
- 
-    this.props.dispatch({
-      type: 'points/querypointdata',
-      payload: {
-        dgimn: this.props.selpoint.DGIMN,
-        current: 1,
-        ...this.state,
-      },
-    });
-   
+  onDateOK = () => {
+      if (this.state.monitortype != "alarm") {
+        this.props.dispatch({
+          type: 'points/querypointdata',
+          payload: {
+            dgimn: this.props.selpoint.DGIMN,
+            current: 1,
+            ...this.state,
+          },
+        });
+      } else {
+        this.props.dispatch({
+          type: 'alarm/getAlarmHistoryList',
+          payload: {
+            querydate: this.state.alarmquerydate,
+            dgimn: this.props.selpoint.DGIMN,
+            pageindex: 1,
+            current: 1,
+            beginTime: this.state.alarmquerydate[0].format('YYYY-MM-DD 00:00:00'),
+            endTime: this.state.alarmquerydate[1].format('YYYY-MM-DD HH:mm:ss'),
+            pagesize: this.props.size,
+            verifyState: this.state.verfystate
+          },
+        });
+      }
   }
   onPollutantChange=(value) => {
- 
     this.setState({
       pollutant: value,
     });
@@ -140,6 +185,25 @@ class MonitorDetail extends PureComponent {
     this.setState({
       countrylength:value.length
     })
+  }  
+  handleChange =(value)=> {
+    this.setState({
+      verfystate: value
+    });
+
+    this.props.dispatch({
+      type: 'alarm/getAlarmHistoryList',
+      payload: {
+        querydate: this.state.alarmquerydate,
+        dgimn: this.props.selpoint.DGIMN,
+        pageindex: 1,
+        current: 1,
+        beginTime: this.state.alarmquerydate[0].format('YYYY-MM-DD 00:00:00'),
+        endTime:this.state.alarmquerydate[1].format('YYYY-MM-DD HH:mm:ss'),
+        pagesize:this.props.size,
+        verifyState:value
+      },
+    });
   }
   render() {
     const { selpoint, effects ,countryPointInfo} = this.props;
@@ -153,7 +217,7 @@ class MonitorDetail extends PureComponent {
           tabBarExtraContent={
             <div>
                {
-                 this.state.monitortype!="realtime" && this.state.monitortype!="minute"?
+                 this.state.monitortype=="hour" || this.state.monitortype=="day"?
                   <Select mode="multiple"   
                   value={this.state.countryPointInfo} style={{ width: 500 }} onChange={this.onCountryChange} labelInValue={true}   placeholder="请选择对比国控点">
                   {
@@ -164,15 +228,22 @@ class MonitorDetail extends PureComponent {
                   </ Select>: 
                   <div></div>
                }
-              <Select value={this.state.pollutant} style={{ width: 120 }} onChange={this.onPollutantChange} style={{ marginLeft: 10 }}>
-                {
-                  selpoint.pollutantList.map((item, key) => {
-                    return <Option key={key} value={item.pollutantCode}>{item.pollutantName}</Option>;
-                  })
-                }
-              </Select>
+              {
+                this.state.monitortype != "alarm" ?
+                  <Select value={this.state.pollutant} style={{ width: 120 }} onChange={this.onPollutantChange} style={{ marginLeft: 10 }}>
+                    {
+                      selpoint.pollutantList.map((item, key) => {
+                        return <Option key={key} value={item.pollutantCode}>{item.pollutantName}</Option>;
+                      })
+                    }
+                  </Select> : <Select defaultValue={this.state.verfystate} value={this.state.verfystate} style={{ width: 120 }} onChange={this.handleChange}>
+                    <Option value="">全部</Option>
+                    <Option value="0">未核实</Option>
+                    <Option value="2">已核实</Option>
+                  </Select>
+              }
               <RangePicker
-                value={this.state.querydate}
+                value={this.state.monitortype != "alarm" ? this.state.querydate : this.state.alarmquerydate}
                 ranges={{ 今天: [moment(), moment()], 本月: [moment(), moment().endOf('month')], 上个月: [moment(), moment().endOf('month')] }}
                 showTime
                 format={this.state.dateformat}
@@ -193,6 +264,9 @@ class MonitorDetail extends PureComponent {
           </TabPane>
           <TabPane tab="日数据" key="day" >
             <DayData dataType={'day'}/>
+          </TabPane>
+          <TabPane tab="报警数据" key="alarm" >
+           <AlarmData/>
           </TabPane>
         </Tabs>
         {/* {this.props.match.params.pointid} */}

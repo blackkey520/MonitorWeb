@@ -296,7 +296,6 @@ onChange=(value)=>{
   }, 1000);
 }
 modifymsgDetailStateData=(DGIMN,datenow)=>{
-  // console.log(this._MessageDetail);
   this._MessageDetail.modifyMessageDetailStateData(DGIMN,datenow);
 }
 transfershowdetail=(showdetail)=>{

@@ -22,6 +22,7 @@ const dynamicWrapper = (app, models, component) => {
       if (modelNotExisted(app, model)) {
         // eslint-disable-next-line
         app.model(require(`../models/${model}`).default);
+        console.log('aaaaaaa'+`/models/${model}`);
       }
     });
     return (props) => {
@@ -37,9 +38,12 @@ const dynamicWrapper = (app, models, component) => {
   // () => import('module')
   return dynamic({
     app,
-    models: () => models.filter(
-      model => modelNotExisted(app, model)).map(m => import(`../models/${m}.js`)
-    ),
+    models: () => {
+        var ass=models.filter(model => modelNotExisted(app, model));
+        return ass.map(m => {
+          return import(`../models/${m}.js`)
+        });
+    },
     // add routerData prop
     component: () => {
       if (!routerDataCache) {
@@ -75,10 +79,10 @@ export const getRouterData = (app) => {
       component: dynamicWrapper(app, ['user', 'login','search', 'alarm'], () => import('../layouts/MonitorLayout')),
     },
     '/monitor/list/mlist': {
-      component: dynamicWrapper(app, ['monitor', 'points'], () => import('../routes/MonitorDataList')),
+      component: dynamicWrapper(app, ['monitor', 'points', 'alarm'], () => import('../routes/MonitorDataList')),
     },
     '/monitor/list/alarm': {
-      component: dynamicWrapper(app, ['monitor', 'points'], () => import('../routes/AlarmDataList')),
+      component: dynamicWrapper(app, ['monitor', 'points', 'alarm'], () => import('../routes/AlarmDataList')),
     },
     '/monitor/map': {
       component: dynamicWrapper(app, ['points'], () => import('../routes/MonitorDataMap')),

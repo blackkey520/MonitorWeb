@@ -205,13 +205,14 @@ export async function getAllPointAlarmInfo(params) {
   return result === null ? { data: null } : result;
 }
 
-export async function GetAlarmHistoryList(params) {
+export async function getAlarmHistoryList(params) {
   const body = {
-    DGIMN: params.DGIMN,
+    DGIMN: params.dgimn,
     beginTime: params.beginTime,
     endTime: params.endTime,
     pageindex: params.pageindex,
     pagesize: params.pagesize,
+    verifyState: params.verifyState
   };
   const result = await post('/api/rest/AtmosphereApi/AlarmData/GetAlarmHistoryList', body, null);  
   return result === null ? { data: null } : result;

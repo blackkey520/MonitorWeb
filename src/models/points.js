@@ -336,7 +336,6 @@ export default Model.extend({
         DGIMN: payload.dgimn
       });
       yield update({ levels });
-
       const result = yield call(loadMonitorDatalist, { 
         PollutantCode: payload.pollutant,
         DGIMN: payload.dgimn,
